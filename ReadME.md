@@ -21,7 +21,7 @@
 			<li><a href="#d">Dropdown</a></li>
 			<li><a href="#w">Window</a></li>
 			<li><a href="#tb">Tab</a></li>
-			<li><a href="#i">InputField</a></li>
+			<li><a href="#i">TextField</a></li>
 			<li><a href="#m">MainMenu</a></li>
 		</ol>
 	</li>
