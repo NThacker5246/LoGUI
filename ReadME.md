@@ -351,6 +351,7 @@ void btn(){
 
 void draw(){
 	background(120);
+	win_tick();
 	btn.tick(); //initialize the button(no delay)
 }
 ```
@@ -373,6 +374,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	sld.tick(); //init slider (no delay)
 	if(millis() - tmr <= 10){ //timer based on millis (dt = 10 ms)
 		println(sld.value); //return value
@@ -396,6 +398,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	tog.tick();
 	println(tog.value);
 }
@@ -418,6 +421,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	drop.tick();
 	if(millis() - tmr >= 10){
 		switch(drop.value){
@@ -474,6 +478,7 @@ void btn1() {
 }
 
 void draw() {
+	win_tick();
 	background(120);
 	win.tick();
 }
@@ -529,6 +534,7 @@ void w2() {
 
 void draw() {
 	background(120);
+	win_tick();
 	tab.tick();
 }
 ```
