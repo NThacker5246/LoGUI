@@ -1,5 +1,7 @@
 boolean mouseOPressed = false, mp1 = false;
 
+int _FONT = 16;
+
 void win_tick() {
   if (!mp1 && mousePressed) {
     mp1 = true;
@@ -13,12 +15,23 @@ void win_tick() {
 
 class Button {
   PImage sprite;
-  int x, y, w, h;
+  int x, y, w, h, prim;
   boolean flag;
   String name;
+  int back = 255, text = 0;
 
   Button(PImage img, int px, int py, int pw, int ph, String nam) {
     sprite = img;
+    x = px;
+    y = py;
+    w = pw;
+    h = ph;
+    flag = false;
+    name = nam;
+  }
+
+  Button(int primitive, int px, int py, int pw, int ph, String nam) {
+    prim = primitive;
     x = px;
     y = py;
     w = pw;
@@ -35,7 +48,17 @@ class Button {
       flag = false;
     }
 
-    image(sprite, x, y, w, h);
+    switch(prim) {
+    case 0:
+      image(sprite, x, y, w, h);
+      break;
+    case 1:
+      fill(back);
+      rect(x, y, w, h);
+      fill(text);
+      text(name, x, y + (h - _FONT)/2, w, h);
+      //case 2: fill(255); circle(x, y, w); fill(0); text(name, x, y, w, w);
+    }
   }
 
   void move(int deltaX, int deltaY) {
@@ -49,6 +72,7 @@ class Slider {
   int x, y, w, h;
   float value, minV, maxV;
   boolean flag;
+  int back, fag, type;
 
   Slider(PImage b, PImage f, int px, int py, int pw, int ph, float minValue, float maxValue) {
     bg = b;
@@ -60,11 +84,25 @@ class Slider {
     value = 0;
     minV = minValue;
     maxV = maxValue;
+    type = 0;
+  }
+
+  Slider(int b, int f, int px, int py, int pw, int ph, float minValue, float maxValue) {
+    back = b;
+    fag = f;
+    x = px;
+    y = py;
+    w = pw;
+    h = ph;
+    value = 0;
+    minV = minValue;
+    maxV = maxValue;
+    type = 1;
   }
 
   void tick() {
     float curPos = (value + minV) / (abs(minV) + abs(maxV));
-    curPos *= w;
+    curPos *= (w - 20);
     if ((mouseOPressed || flag) && abs((x + (w >> 1)) - mouseX) <= w && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
       value += (((float) (mouseX - curPos - x) / w) * (abs(minV) + abs(maxV))) - minV;
       value = clamp(value, minV, maxV);
@@ -73,8 +111,18 @@ class Slider {
       flag = false;
     }
 
-    image(bg, x, y, w, h);
-    image(fg, x + curPos, y, 20, h);
+    switch(type) {
+    case 0:
+      image(bg, x, y, w, h);
+      image(fg, x + curPos, y, 20, h);
+      break;
+    case 1:
+      fill(back);
+      rect(x, y, w, h);
+      fill(fag);
+      rect(x + curPos, y, 20, h);
+      break;
+    }
   }
 
   void move(int deltaX, int deltaY) {
@@ -87,6 +135,7 @@ class Toggle {
   PImage bg, fg;
   int x, y, w, h;
   boolean flag, value;
+  int back, fag, type;
 
   Toggle(PImage b, PImage f, int px, int py, int pw, int ph) {
     bg = b;
@@ -96,6 +145,18 @@ class Toggle {
     w = pw;
     h = ph;
     flag = false;
+    type = 0;
+  }
+
+  Toggle(int b, int f, int px, int py, int pw, int ph) {
+    back = b;
+    fag = f;
+    x = px;
+    y = py;
+    w = pw;
+    h = ph;
+    flag = false;
+    type = 1;
   }
 
   void tick() {
@@ -106,8 +167,19 @@ class Toggle {
       flag = false;
     }
 
-    image(bg, x, y, w, h);
-    image(fg, value ? x + w - 20 : x, y, 20, h);
+    switch(type) {
+    case 0:
+      image(bg, x, y, w, h);
+      image(fg, value ? x + w - 20 : x, y, 20, h);
+
+      break;
+    case 1:
+      fill(back);
+      rect(x, y, w, h);
+      fill(fag);
+      rect(value ? x + w - 20 : x, y, 20, h);
+      break;
+    }
   }
 
   void move(int deltaX, int deltaY) {
@@ -117,7 +189,7 @@ class Toggle {
 }
 
 class Dropdown {
-  int x, y, w, h, d;
+  int x, y, w, h, d, back = color(75, 75, 200), fag = 255;
   boolean open, flag;
   String[] mens;
   int value;
@@ -142,10 +214,10 @@ class Dropdown {
     if (open) {
       for (int i = 0; i < mens.length; i++) {
         int yn = y + d * (i+1);
-        fill(color(75, 75, 200));
+        fill(back);
         rect(x, yn, w, h);
-        fill(255);
-        text(mens[i], x, yn+d*0.75);
+        fill(fag);
+        text(mens[i], x, yn + (h - _FONT)/2, w, h);
         if (mousePressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
           value = i;
           open = false;
@@ -155,10 +227,10 @@ class Dropdown {
         }
       }
     }
-    fill(color(75, 75, 200));
+    fill(back);
     rect(x, y, w, h);
-    fill(255);
-    text(mens[value], x, y + d*0.75);
+    fill(fag);
+    text(mens[value], x, y + (h - _FONT)/2, w, h);
   }
 
   void move(int deltaX, int deltaY) {
@@ -194,7 +266,7 @@ class Window {
     fill(tcol);
     rect(x, y, w, d);
     fill(255);
-    text(name, x, y + ((float) d * 0.75));
+    text(name, x, y + (h - _FONT)/2, w, h);
     if (flag || (mouseOPressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (d >> 1)) - mouseY) <= (d / 2))) {
       if (!mousePressed) {
         flag = false;
@@ -392,7 +464,7 @@ class Tab {
       fill(255);
       rect(xn, y, d, h);
       fill(0);
-      text(subTabs[i], xn, y + h/2);
+      text(subTabs[i], xn, y + (h - _FONT)/2, w, h);
 
       if (mousePressed && flag != mousePressed && abs((xn + (d >> 1)) - mouseX) <= (d/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
         value = i;
@@ -465,9 +537,9 @@ class TextField {
     fill(50);
     rect(x, y, w, h);
     fill(255);
-    text(value, 0, cnt, x, y + h/2);
+    text(value, 0, cnt, x, y +(h + _FONT/2)/2);
     stroke(255);
-    line(x + 9.75 * trc, y, x + 9.75 * trc, y + h);
+    line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
     stroke(0);
   }
 }
@@ -507,7 +579,7 @@ class MainMenu {
         for (int j = 0; j < funcs[i].length; j++) {
           rect(i * (20 * top_text[i].length()), 30 + j * 30, 20 * top_text[i].length(), 30);
           fill(0);
-          text(funcs[i][j], i * (20 * top_text[i].length()), 30*0.75 + 30 + j * 30);
+          text(funcs[i][j], i * (20 * top_text[i].length()), 30 + j * 30 + (30 - _FONT/2));
           fill(255);
           if (mouseOPressed && spamclick != mousePressed && abs((i * (20 * top_text[i].length()) + (20 * top_text[i].length() >> 1)) - mouseX) <= (10 * top_text[i].length()) && abs(30*0.75 + 30 + j * 30 - mouseY) <= 15) {
             method(funcs[i][j]);
@@ -518,7 +590,7 @@ class MainMenu {
 
       rect(i * (20 * top_text[i].length()), 0, 20 * top_text[i].length(), 30);
       fill(0);
-      text(top_text[i], i * (20 * top_text[i].length()), 30*0.75);
+      text(top_text[i], i * (20 * top_text[i].length()), (30 - _FONT/2));
       fill(255);
     }
   }

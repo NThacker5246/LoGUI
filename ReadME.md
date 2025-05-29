@@ -4,12 +4,15 @@
 	<li><a href="#en">English (tap here)</a></li>
 </ul>
 
-Библиотека Processing для пользовательского интерфейса <b>LoGUI</b>
+<h1>Библиотека Processing для пользовательского интерфейса <b>LoGUI</b> v1.2</h1>
 
-<h3>Внимание:</h3> 
-<h4>Во-первых в v1.1 нужно вызывать всегда в draw win_tick(), т.к новый метод обработки нажатий и антидребезга требует вызова win_tick. Иначе элементы работать не будут</h4>
-<h4>Во-вторых документация на английском обновляться не будет, т.к мне просто лень</h4>
+<h2>Обновления</h2>
+<h3>v1.1</h3> 
+<h4>В v1.1 нужно вызывать всегда в draw win_tick(), т.к новый метод обработки нажатий и антидребезга требует вызова win_tick. Иначе элементы работать не будут</h4>
 
+<h3>v1.2</h3>
+<h4>Теперь UI адаптивный, автоматическое центрированние под шрифт, нужно в setup после textFont(createFont("Lucida Console", val)), указать _FONT = val, тогда центрированние будет работать, кстати курсор у TextField также настраивается от _FONT</h4>
+<h4>Можно уставовить примитивы и цвет, если некогда рисовать спрайты, а также это даёт возможность создания анимаций</h4>
 <ol>
 	<li>Предыстория</li>
 	<li>
@@ -21,7 +24,7 @@
 			<li><a href="#d">Dropdown</a></li>
 			<li><a href="#w">Window</a></li>
 			<li><a href="#tb">Tab</a></li>
-			<li><a href="#i">InputField</a></li>
+			<li><a href="#i">TextField</a></li>
 			<li><a href="#m">MainMenu</a></li>
 		</ol>
 	</li>
@@ -34,7 +37,7 @@
 
 <h3 id="b">Button</h3>
 <p>Button - простая кнопка, по нажатию на которую срабатывает событие в функции-обработчике</p>
-Простейший код
+Простейший код со спрайтами
 
 ```pde
 Button btn; //кнопка
@@ -55,6 +58,42 @@ void draw(){
 	btn.tick(); //опрашиваем кнопку (не должно быть delay)
 }
 ```
+С текстом (+ анимация по приколу)
+```pde
+Button btn; //кнопка
+int tmr = 0; //таймер задержки
+void setup(){
+	size(1000, 500);
+	btn = new Button(1, 0, 0, 50, 25, "btn"); //кнопка primitive (1 - квадрат), x, y, w, h
+	btn.back = color(127, 127, 127);
+	btn.text = color(0, 0, 0);
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
+}
+
+void btn(){
+	//анимация
+	animate = true;
+  	btn.text = 255;
+  	btn.back = 0;
+	tmr = millis();
+	//тело кода
+	println("Clicked!");
+}
+
+void draw(){
+	if(animate, millis() - tmr >= 30){
+		btn.back = color(127, 127, 127);
+		btn.text = color(0, 0, 0);
+		animate = !animate;
+		tmr = millis();
+	}
+	background(120);
+	win_tick();
+	btn.tick(); //опрашиваем кнопку (не должно быть delay)
+}
+```
 
 Кнопка имеет автоматическую защиту от дребезга. По нажатию в консоли будет сообщение "Clicked!".
 Можно добавить другие кнопки, и для них свои обработчики события.
@@ -63,6 +102,7 @@ void draw(){
 <p>Slider - слайдер, при перемещении ползунка меняется значение. Можно управлять, например, углом сервомашинки</p>
 Простейший код
 
+С картинкой
 ```pde
 Slider sld;
 int tmr = 0;
@@ -82,6 +122,27 @@ void draw(){
 	}
 }
 ```
+С цветом
+
+```pde
+Slider sld;
+int tmr = 0;
+
+void setup(){
+	size(1000, 500);
+	sld = new Slider(color(50, 50, 200), color(200, 50, 50), 50, 160, 450, 50, 0, 10); //sld1 - фон, sld2 - ползунок. x, y, w, h, minV, maxV
+}
+
+void draw(){
+	background(120);
+	win_tick();
+	sld.tick(); //опрашиваем слайдер (не должно быть delay)
+	if(millis() - tmr <= 10){ //таймер на millis (dt = 10 ms)
+		println(sld.value); //получаем значение
+		tmr = millis();
+	}
+}
+```
 
 Значение полученное через sld.value будет между minV и maxV.
 Таймер на millis нужен, чтобы не заполнять слишком сильно консоль (можно и без него).
@@ -89,12 +150,28 @@ void draw(){
 <h3 id="t">Toggle</h3>
 <p>Toggle - флажок. Имеет значение true и false. Им можно открывать/закрывать транзистор/реле</p>
 Простейший код
-
+С картинкой
 ```pde
 Toggle tog;
 
 void setup(){
 	tog = new Toggle(loadImage("tog1.png"), loadImage("tog2.png"), 50, 220, 100, 30); //tog1 - фон, tog2 - ползунок, x, y, w, h 
+}
+
+void draw(){
+	background(120);
+	win_tick();
+	tog.tick();
+	println(tog.value);
+}
+```
+
+С цветом
+```pde
+Toggle tog;
+
+void setup(){
+	tog = new Toggle(color(20, 50, 70), color(10, 200, 10), 50, 220, 100, 30); //tog1 - фон, tog2 - ползунок, x, y, w, h 
 }
 
 void draw(){
@@ -117,6 +194,12 @@ int tmr = 0;
 void setup(){
 	String[] str = {"Item1", "Item2", "Item3"}; //элементы
 	drop = new Dropdown(str, 50, 270, 100, 20, 20); // elems, x, y, w, h, d - размер элементов
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
+	//стандартные цвета
+	//drop.back = color(75, 75, 200); 
+	//drop.fag = 255;
 }
 
 void draw(){
@@ -154,6 +237,9 @@ Window win;
 void setup() {
 	size(1000, 500);
 	frameRate(60);
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
 	btn = new Button(loadImage("test.png"), 50, 130, 50, 20, "btn1");
 	sld = new Slider(loadImage("sld1.png"), loadImage("sld2.png"), 50, 160, 450, 50, 0, 10);
 	tog = new Toggle(loadImage("sld1.png"), loadImage("sld2.png"), 50, 220, 100, 30);
@@ -200,6 +286,9 @@ Tab tab;
 void setup() {
 	size(1000, 500);
 	frameRate(60);
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
 	btn = new Button(loadImage("test.png"), 50, 130, 50, 20, "btn1");
 	sld = new Slider(loadImage("sld1.png"), loadImage("sld2.png"), 50, 160, 450, 50, 0, 10);
 	tog = new Toggle(loadImage("sld1.png"), loadImage("sld2.png"), 50, 220, 100, 30);
@@ -250,6 +339,9 @@ TextField txt;
 
 void setup(){
 	txt = new TextField(250, 400, 250, 50, 20); //x, y, w, h, buffer_size
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
 }
 
 void draw(){
@@ -276,6 +368,9 @@ void setup(){
 	menu.addNextMenu(0, "File", fl);
 	menu.addNextMenu(1, "Edit", ed);
 	menu.addNextMenu(2, "Help", hp);
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
 }
 
 void draw(){
@@ -301,11 +396,10 @@ void New(){println("Restarted");}
 
 void About(){
 	println("Powered by HackerGUI (LoGUI) lib");
-	println("Version 1.1");
+	println("Version 1.2");
 	println("© NThacker 2025. C0d9d by NTh6ck9r");
 }
 ```
-
 
 
 A Graphical "Processing" library for interface customization - <b id="en">LoGUI</b>
@@ -335,7 +429,7 @@ This library helps you create beautiful buttons with cool designs in seconds and
 
 <h3 id="be">Button</h3>
 <p>Button - a simple button, on press calls an event in function</p>
-
+With pictures
 ```pde
 Button btn; //obviously a button
 PImage img; //object
@@ -354,6 +448,44 @@ void draw(){
 	btn.tick(); //initialize the button(no delay)
 }
 ```
+
+With text (+ animation for joke)
+```pde
+Button btn; ////obviously a button
+int tmr = 0; //millis timer
+void setup(){
+	size(1000, 500);
+	btn = new Button(1, 0, 0, 50, 25, "btn"); //button primitive (1 - square), x, y, w, h
+	btn.back = color(127, 127, 127);
+	btn.text = color(0, 0, 0);
+	textFont(createFont("Lucida Console", 16));
+	//here _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
+}
+
+void btn(){
+	//анимация
+	animate = true;
+  	btn.text = 255;
+  	btn.back = 0;
+	tmr = millis();
+	//тело кода
+	println("Clicked!");
+}
+
+void draw(){
+	if(animate, millis() - tmr >= 30){
+		btn.back = color(127, 127, 127);
+		btn.text = color(0, 0, 0);
+		animate = !animate;
+		tmr = millis();
+	}
+	background(120);
+	win_tick();
+	btn.tick(); //опрашиваем кнопку (не должно быть delay)
+}
+```
+
 
 Button automaticaly protected from multi-click
 On press it prints in terminal "Clicked!".
