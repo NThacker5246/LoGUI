@@ -430,6 +430,7 @@ This library helps you create beautiful buttons with cool designs in seconds and
 <h3 id="be">Button</h3>
 <p>Button - a simple button, on press calls an event in function</p>
 With pictures
+
 ```pde
 Button btn; //obviously a button
 PImage img; //object
@@ -445,6 +446,7 @@ void btn(){
 
 void draw(){
 	background(120);
+	win_tick();
 	btn.tick(); //initialize the button(no delay)
 }
 ```
@@ -505,6 +507,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	sld.tick(); //init slider (no delay)
 	if(millis() - tmr <= 10){ //timer based on millis (dt = 10 ms)
 		println(sld.value); //return value
@@ -528,6 +531,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	tog.tick();
 	println(tog.value);
 }
@@ -550,6 +554,7 @@ void setup(){
 
 void draw(){
 	background(120);
+	win_tick();
 	drop.tick();
 	if(millis() - tmr >= 10){
 		switch(drop.value){
@@ -607,6 +612,7 @@ void btn1() {
 
 void draw() {
 	background(120);
+	win_tick();
 	win.tick();
 }
 ```
@@ -661,6 +667,7 @@ void w2() {
 
 void draw() {
 	background(120);
+	win_tick();
 	tab.tick();
 }
 ```
