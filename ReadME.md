@@ -116,7 +116,7 @@ void draw(){
 	background(120);
 	win_tick();
 	sld.tick(); //опрашиваем слайдер (не должно быть delay)
-	if(millis() - tmr <= 10){ //таймер на millis (dt = 10 ms)
+	if(millis() - tmr >= 10){ //таймер на millis (dt = 10 ms)
 		println(sld.value); //получаем значение
 		tmr = millis();
 	}
@@ -137,7 +137,7 @@ void draw(){
 	background(120);
 	win_tick();
 	sld.tick(); //опрашиваем слайдер (не должно быть delay)
-	if(millis() - tmr <= 10){ //таймер на millis (dt = 10 ms)
+	if(millis() - tmr >= 10){ //таймер на millis (dt = 10 ms)
 		println(sld.value); //получаем значение
 		tmr = millis();
 	}
@@ -151,6 +151,7 @@ void draw(){
 <p>Toggle - флажок. Имеет значение true и false. Им можно открывать/закрывать транзистор/реле</p>
 Простейший код
 С картинкой
+
 ```pde
 Toggle tog;
 
@@ -167,6 +168,7 @@ void draw(){
 ```
 
 С цветом
+
 ```pde
 Toggle tog;
 
@@ -511,7 +513,7 @@ void draw(){
 	background(120);
 	win_tick();
 	sld.tick(); //init slider (no delay)
-	if(millis() - tmr <= 10){ //timer based on millis (dt = 10 ms)
+	if(millis() - tmr >= 10){ //timer based on millis (dt = 10 ms)
 		println(sld.value); //return value
 		tmr = millis();
 	}
@@ -533,7 +535,7 @@ void draw(){
 	background(120);
 	win_tick();
 	sld.tick(); ////init slider (no delay)
-	if(millis() - tmr <= 10){ //timer based on millis (dt = 10 ms)
+	if(millis() - tmr >= 10){ //timer based on millis (dt = 10 ms)
 		println(sld.value); //return value
 		tmr = millis();
 	}
