@@ -461,17 +461,17 @@ void setup(){
 	btn.back = color(127, 127, 127);
 	btn.text = color(0, 0, 0);
 	textFont(createFont("Lucida Console", 16));
-	//here _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	//here _FONT not required, as default here 16, but we're reset it manually
 	_FONT = 16;
 }
 
 void btn(){
-	//анимация
+	//animation
 	animate = true;
   	btn.text = 255;
   	btn.back = 0;
 	tmr = millis();
-	//тело кода
+	//click event
 	println("Clicked!");
 }
 
@@ -484,7 +484,7 @@ void draw(){
 	}
 	background(120);
 	win_tick();
-	btn.tick(); //опрашиваем кнопку (не должно быть delay)
+	btn.tick(); //initialize the button(no delay)
 }
 ```
 
@@ -495,6 +495,8 @@ You can add other buttons with separate functionalities
 
 <h3 id="se">Slider</h3>
 <p>Slider - basic slider, moving knob changes the value. </p>
+
+With sprites
 
 ```pde
 Slider sld;
@@ -516,17 +518,58 @@ void draw(){
 }
 ```
 
+With color
+
+```pde
+Slider sld;
+int tmr = 0;
+
+void setup(){
+	size(1000, 500);
+	sld = new Slider(color(50, 50, 200), color(200, 50, 50), 50, 160, 450, 50, 0, 10); //sld1 - фон, sld2 - ползунок. x, y, w, h, minV, maxV
+}
+
+void draw(){
+	background(120);
+	win_tick();
+	sld.tick(); ////init slider (no delay)
+	if(millis() - tmr <= 10){ //timer based on millis (dt = 10 ms)
+		println(sld.value); //return value
+		tmr = millis();
+	}
+}
+```
+
 The value returned from sld.value clamped in between minV and maxV.
 Timer based on millis controlls the amount of output signals in terminal. Not required
 
 <h3 id="te">Toggle</h3>
 <p>Toggle - returns true or false. Helpful for boolean operations and forms</p>
 
+With sprites
+
 ```pde
 Toggle tog;
 
 void setup(){
 	tog = new Toggle(loadImage("tog1.png"), loadImage("tog2.png"), 50, 220, 100, 30); //tog1 - background, tog2 - slider, x, y, w, h 
+}
+
+void draw(){
+	background(120);
+	win_tick();
+	tog.tick();
+	println(tog.value);
+}
+```
+
+With color
+
+```pde
+Toggle tog;
+
+void setup(){
+	tog = new Toggle(color(20, 50, 70), color(10, 200, 10), 50, 220, 100, 30); //background, slider, x, y, w, h 
 }
 
 void draw(){
