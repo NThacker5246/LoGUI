@@ -6,12 +6,15 @@ Window win;
 Tab tab;
 TextField txt;
 
+Plotter plt;
+
 MainMenu menu;
 boolean animate = false;
 
 void setup() {
   size(1000, 500);
   frameRate(60);
+  //getHTML("index.html");
   textFont(createFont("Lucida Console", 16));
   btn = new Button(1, 50, 130, 50, 20, "btn1");
   sld = new Slider(color(50, 50, 200), color(200, 50, 50), 50, 160, 450, 50, 0, 10);
@@ -19,6 +22,8 @@ void setup() {
   String[] str = {"Item1", "Item2", "Item3"};
   drop = new Dropdown(str, 50, 270, 100, 20, 20);
   win = new Window("Test.exe", 50, 100, 500, 200, 20);
+
+  plt = new Plotter(750, 100, 100, 200, 34, 5, 0, 255);
 
   win.btns = new Button[1];
   win.slds = new Slider[1];
@@ -61,6 +66,8 @@ void w2() {
   sld.tick();
 }
 
+float x = 0, v = 0.1;
+
 void draw() {
   background(120);
 
@@ -71,9 +78,16 @@ void draw() {
   }
 
   win_tick();
-  tab.tick();
   txt.tick();
   menu.tick();
+  tab.tick();
+  
+  x = x + v;
+  if(abs(x) > 1){
+    v *= -1;
+  }
+  plt.value += (((random(2)) - 1) - plt.value) * 0.1;
+  plt.tick();
 }
 
 void Open() {

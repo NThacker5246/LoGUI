@@ -256,7 +256,7 @@ class Window {
     w = pw;
     h = ph;
     d = dh;
-    bcol = 255;
+    bcol = color(200, 200, 200, 127);
     tcol = 120;
   }
 
@@ -319,131 +319,6 @@ class Window {
   }
 }
 
-/*
-class Window {
- boolean flag = false;
- boolean preventOverlapping = false;
- int x, y, w, h, d, bcol, tcol, tDX, tDY;
- String name;
- Slider[] slds;
- Button[] btns;
- Toggle[] togs;
- Dropdown[] drops;
- 
- Window(String name1, int px, int py, int pw, int ph, int dh) {
- name = name1;
- x = px;
- y = py;
- w = pw;
- h = ph;
- d = dh;
- bcol = 255;
- tcol = 120;
- }
- 
- void tick() {
- fill(bcol);
- rect(x, y, w, h);
- fill(tcol);
- rect(x, y, w, d);
- fill(255);
- text(name, x + 10, y + ((float) d * 0.75));
- 
- // Handle dragging
- if (flag || (mouseOPressed && abs((x + (w >> 1)) - mouseX) <= (w / 2) && abs((y + (d >> 1)) - mouseY) <= (d / 2))) {
- if (!mousePressed) {
- flag = false;
- return;
- }
- if (!flag) {
- tDX = mouseX - x;
- tDY = mouseY - y;
- flag = true;
- }
- 
- int deltaX = mouseX - x - tDX;
- int deltaY = mouseY - y - tDY;
- 
- if (deltaX != 0 || deltaY != 0) {
- x += deltaX;
- y += deltaY;
- 
- for (int i = 0; i < slds.length; i++) {
- slds[i].move(deltaX, deltaY);
- }
- for (int i = 0; i < btns.length; i++) {
- btns[i].move(deltaX, deltaY);
- }
- for (int i = 0; i < togs.length; i++) {
- togs[i].move(deltaX, deltaY);
- }
- for (int i = 0; i < drops.length; i++) {
- drops[i].move(deltaX, deltaY);
- }
- 
- 
- if (preventOverlapping) {
- preventOverlap();
- }
- }
- }
- 
- 
- for (int i = 0; i < slds.length; i++) {
- slds[i].tick();
- }
- for (int i = 0; i < btns.length; i++) {
- btns[i].tick();
- }
- for (int i = 0; i < togs.length; i++) {
- togs[i].tick();
- }
- for (int i = 0; i < drops.length; i++) {
- drops[i].tick();
- }
- }
- 
- void preventOverlap() {
- if (!isOverlapping(this == win_player ? win_modify : win_player)) {
- return;
- }
- 
- Window other = this == win_player ? win_modify : win_player;
- 
- 
- float overlapLeft = (x + w) - other.x;
- float overlapRight = (other.x + other.w) - x;
- float overlapTop = (y + h) - other.y;
- float overlapBottom = (other.y + other.h) - y;
- 
- 
- float minOverlap = min(min(overlapLeft, overlapRight), min(overlapTop, overlapBottom));
- 
- int deltaX = 0;
- int deltaY = 0;
- 
- 
- if (minOverlap == overlapLeft) {
- deltaX = -(int)(overlapLeft + 10);
- } else if (minOverlap == overlapRight) {
- deltaX = (int)(overlapRight + 10);
- } else if (minOverlap == overlapTop) {
- deltaY = -(int)(overlapTop + 10);
- } else if (minOverlap == overlapBottom) {
- deltaY = (int)(overlapBottom + 10);
- }
- 
- 
- x += deltaX;
- y += deltaY;
- moveElements(deltaX, deltaY);
- }
- 
- boolean isOverlapping(Window other) {
- return !(x + w < other.x || x > other.x + other.w || y + h < other.y || y > other.y + other.h);
- }
- }
- */
 class Tab {
   String[] subTabs;
   int x, y, w, h, d, value;
@@ -542,6 +417,32 @@ class TextField {
     line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
     stroke(0);
   }
+
+
+  int parseInt() {
+    int result = 0;
+    for (int i = 0; i < cnt; i++) {
+      result *= 10;
+      result += value[i] - '0';
+    }
+    return result;
+  }
+
+  float parseFloat() {
+    int result = 0;
+    int sig = 0;
+    boolean sg = true;
+    for (int i = 0; i < cnt; i++) {
+      if (value[i] == ',' || value[i] == '.') {
+        sg = true;
+        continue;
+      }
+      if (sg) sig *= 10;
+      result *= 10;
+      result += value[i] - '0';
+    }
+    return (float) result / (float) sig;
+  }
 }
 
 class MainMenu {
@@ -588,10 +489,45 @@ class MainMenu {
         }
       }
 
+
+
       rect(i * (20 * top_text[i].length()), 0, 20 * top_text[i].length(), 30);
       fill(0);
       text(top_text[i], i * (20 * top_text[i].length()), (30 - _FONT/2));
       fill(255);
+    }
+  }
+}
+
+class Plotter {
+  int x, y, w, h, buf, dtm, tc;
+  float[] dots;
+  float value, tv, ix;
+
+  Plotter(int px, int py, int pw, int ph, int dotCount, int tickCount, float min, float max) {
+    dots = new float[dotCount];
+    x = px;
+    y = py;
+    w = pw;
+    h = ph;
+    dtm = dotCount;
+    tc = tickCount;
+    tv = (max - min) / tc;
+    ix = min;
+  }
+
+  void tick() {
+    buf = (buf + 1) % dtm;
+    dots[buf] = value;
+    fill(255);
+    rect(x, y, w, h);
+    fill(0);
+    for (int i = 0; i < dtm; i++) {
+      circle(i*3 + x, -dots[(buf + i) % dtm] * (h*0.4) + y + h/2, 2);
+    }
+    int ttc = h / tc;
+    for(int i = 0; i <= tc; i++){
+      text(int(ix + tv * i), x - 45, y + ttc * (tc - i));
     }
   }
 }

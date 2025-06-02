@@ -4,8 +4,8 @@
 	<li><a href="#en">English (tap here)</a></li>
 </ul>
 
-<b>Библиотека Processing для пользовательского интерфейса -</b>
-<h1>LoGUI 1.2</h1>
+<h1>LoGUI 1.3</h1>
+<h2>Библиотека Processing для пользовательского интерфейса</b>
 
 <h2>Обновления</h2>
 <h3>v1.1</h3> 
@@ -14,6 +14,9 @@
 <h3>v1.2</h3>
 <h4>Теперь UI адаптивный, автоматическое центрированние под шрифт, нужно в setup после textFont(createFont("Lucida Console", val)), указать _FONT = val, тогда центрированние будет работать, кстати курсор у TextField также настраивается от _FONT</h4>
 <h4>Можно уставовить примитивы и цвет, если некогда рисовать спрайты, а также это даёт возможность создания анимаций</h4>
+
+<h3>v1.3</h3>
+<h4>Появился плоттер - построитель графиков, также начато создание и интегрированние cstring, планируется добавление HTML constructor и GUI builder</h4>
 <ol>
 	<li>Предыстория</li>
 	<li>
@@ -27,6 +30,7 @@
 			<li><a href="#tb">Tab</a></li>
 			<li><a href="#i">TextField</a></li>
 			<li><a href="#m">MainMenu</a></li>
+			<li><a href="#p">Plotter</a></li>
 		</ol>
 	</li>
 </ol>
@@ -356,6 +360,8 @@ void draw(){
 }
 ```
 
+<p>Появились 2 функции в v1.3 - parseInt и parseFloat, txt.parseInt вернёт число, для txt.parseFloat делиметры запятая, точка</p>
+
 <h3 id="i">MainMenu</h3>
 <p>Типичное меню сверху, которое File, Edit, Help и т.д.</p>
 Простейший код
@@ -404,6 +410,46 @@ void About(){
 }
 ```
 
+<h3 id="p">Plotter</h3>
+<p>Plotter - построитель графиков, очень полезен для чтения сигналов</p>
+<p>Здесь будет протокол чтения связи с Arduino nano по serial</p>
+
+```pde
+import processing.serial.*;
+Serial serial;
+Plotter pl;
+
+void setup(){
+	textFont(createFont("Lucida Console", 16));
+	//здесь _FONT необязателен, по дефолту ставится 16, но мы сделаем для наглядности
+	_FONT = 16;
+
+	pl = Plotter(750, 100, 100, 200, 34, 5, 0, 255); //x, y, w, h, кол-во точек, кол-во подписей, min, max
+	serial = new Serial(this, "COM4", 9600); //nano на com4
+}
+
+void draw(){
+	if(serial.available()){
+		pl.value = (float) serial.read();
+	}
+	pl.tick();
+}
+```
+
+И скетч на .ino
+```cpp
+void setup(){
+	uart.begin(9600); //В GyverCore uart вместо Serial
+}
+
+void loop(){
+	static uint32_t tmr = 0;
+	if(millis() - tmr >= 500){
+		uart.write(analogRead(4)); // используется GyverCore, так что analogRead быстрый
+		tmr = millis(); //сброс таймера
+	}
+}
+```
 
 A Graphical "Processing" library for interface customization - <b id="en">LoGUI</b>
 
