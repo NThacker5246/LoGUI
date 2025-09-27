@@ -2,42 +2,48 @@ Button btn;
 Slider sld;
 Toggle tog;
 Dropdown drop;
-Window win;
+Window win, win2, ab;
 Tab tab;
 TextField txt;
 
 Plotter plt;
-
 MainMenu menu;
-boolean animate = false;
+boolean animate = false, about, toExit;
+
+GUIElem el;
 
 void setup() {
-  size(1000, 500);
   frameRate(60);
-  //getHTML("index.html");
   textFont(createFont("Lucida Console", 16));
-  btn = new Button(1, 50, 130, 50, 20, "btn1");
-  sld = new Slider(color(50, 50, 200), color(200, 50, 50), 50, 160, 450, 50, 0, 10);
-  tog = new Toggle(color(20, 50, 70), color(10, 200, 10), 50, 220, 100, 30);
+  size(1000, 500, P3D);
+  
+  lights();
+
+  btn = new Button(50, 130, 50, 20, "btn1");
+  sld = new Slider(50, 160, 450, 50, color(50, 50, 200), color(200, 50, 50), "sld", -1, 10);
+  tog = new Toggle(50, 220, 100, 30, color(20, 50, 70), color(10, 200, 10), "tog");
   String[] str = {"Item1", "Item2", "Item3"};
-  drop = new Dropdown(str, 50, 270, 100, 20, 20);
-  win = new Window("Test.exe", 50, 100, 500, 200, 20);
+  drop = new Dropdown(50, 270, 100, 20, color(75, 75, 200), 255, str, 20);
+  win = new Window( 50, 100, 500, 200, 20, "Test.exe");
+  win2 = new Window(700, 100, 500, 200, 20, "Default.exe");
 
-  plt = new Plotter(750, 100, 100, 200, 34, 5, 0, 255);
+  plt = new Plotter(750, 100, 100, 200, 255, 0, "", 34, 5, 0, 255);
 
-  win.btns = new Button[1];
-  win.slds = new Slider[1];
-  win.togs = new Toggle[1];
-  win.drops = new Dropdown[1];
+  win.elems = new GUIElem[4];
+ 
+  win.elems[0] = btn;
+  win.elems[1] = sld;
+  win.elems[2] = tog;
+  win.elems[3] = drop;
 
-  win.btns[0] = btn;
-  win.slds[0] = sld;
-  win.togs[0] = tog;
-  win.drops[0] = drop;
+
   String[] st = {"w1", "w2"};
-  tab = new Tab(st, 500, 0, 100, 50, 30);
 
-  txt = new TextField(250, 400, 250, 50, 20);
+  tab = new Tab(500, 0, 60, 50, st, 30);
+
+  txt = new TextField(250, 400, 250, 50, "", 20);
+  win2.elems = new GUIElem[1];
+  win2.elems[0] = txt;
 
   menu = new MainMenu(3);
   String[] fl = {"New", "Open", "Save"};
@@ -46,11 +52,16 @@ void setup() {
   menu.addNextMenu(0, "File", fl);
   menu.addNextMenu(1, "Edit", ed);
   menu.addNextMenu(2, "Help", hp);
+
+  ab = new Window(width/4, height/4, width/2, height/2, 20, "About LoGUI");
+
+  el = new GUIElem("MyElem");
+  el.setLocales(300, 400, 70, 25).setColor(color(100, 70, 200), color(250, 250, 250)).setRounds(5);
 }
 
 void btn1() {
   animate = true;
-  btn.text = 255;
+  btn.txt = 255;
   btn.back = 0;
   println("Test");
   println(sld.value);
@@ -69,25 +80,51 @@ void w2() {
 float x = 0, v = 0.1;
 
 void draw() {
-  background(120);
 
+  //ambient(120);
+  //specular(120);
+  background(120);
+  pointLight(200, 200, 200, 140, 160, 144);
+  
   if (animate) {
     btn.back = 255;
-    btn.text = 0;
+    btn.txt = 0;
     animate = !animate;
   }
 
   win_tick();
-  txt.tick();
   menu.tick();
+  win2.tick();
   tab.tick();
-  
+  txt.tick();
+
   x = x + v;
-  if(abs(x) > 1){
+  if (abs(x) > 1) {
     v *= -1;
   }
   plt.value += (((random(2)) - 1) - plt.value) * 0.1;
   plt.tick();
+  
+  el.tick();
+  
+  if (about) {
+    ab.tick();
+    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 Beta\n© NThacker 2025. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
+    if (keyPressed && keyCode == ESC) {
+      about = false;
+    }
+  }  
+  if (toExit) {
+    ab.tick();
+    text("\nTo exit press Y. To close this win, click N", ab.x, ab.y, ab.w, ab.h);
+    if (keyPressed && key == 'y') {
+      launch("taskkill /im java.exe /f");
+      println("NT");
+    }
+    if (keyPressed && key == 'n') {
+      toExit = false;
+    }
+  }
 }
 
 void Open() {
@@ -112,7 +149,13 @@ void New() {
 }
 
 void About() {
-  println("Powered by HackerGUI (LoGUI) lib");
-  println("Version 1.2");
-  println("© NThacker 2025. C0d9d by NTh6ck9r");
+  about = true;
+  //println("Powered by HackerGUI (LoGUI) lib");
+  //println("Version 1.4 Beta");
+  //println("© NThacker 2025. C0d9d by NTh6ck9r");
+}
+
+void exit() {
+  toExit = true;
+  println("there");
 }

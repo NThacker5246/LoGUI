@@ -13,52 +13,120 @@ void win_tick() {
   }
 }
 
-class Button {
-  PImage sprite;
-  int x, y, w, h, prim;
-  boolean flag;
-  String name;
-  int back = 255, text = 0;
+class GUIElem {
+  int x, y, w, h;
+  int roundsX, roundsY, roundsW, roundsH;
+  int back, txt;
+  String text;
+  PImage img, bob;
 
-  Button(PImage img, int px, int py, int pw, int ph, String nam) {
-    sprite = img;
+  GUIElem(int px, int py, int pw, int ph, int bcol, int col, String name) {
     x = px;
     y = py;
     w = pw;
     h = ph;
-    flag = false;
-    name = nam;
+    back = bcol;
+    txt = col;
+    text = name;
   }
 
-  Button(int primitive, int px, int py, int pw, int ph, String nam) {
-    prim = primitive;
+  GUIElem(int px, int py, int pw, int ph, String name) {
     x = px;
     y = py;
     w = pw;
     h = ph;
-    flag = false;
-    name = nam;
+    back = 255;
+    txt = 0;
+    text = name;
+  }
+
+  GUIElem(String name) {
+    x = 0;
+    y = 0;
+    w = 100;
+    h = 50;
+    back = 255;
+    txt = 0;
+    text = name;
   }
 
   void tick() {
-    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
-      method(name);
-      flag = mousePressed;
-    } else if (!mousePressed) {
-      flag = false;
+    tickUI();
+    if (img != null) {
+      image(img, x, y, w, h, roundsX, roundsY, roundsW, roundsH);
+    } else {
+      fill(back);
+      rect(x, y, w, h, roundsX, roundsY, roundsW, roundsH);
+      if (text != "") {
+        fill(txt);
+        text(text, x, y, w, h);
+      }
     }
 
-    switch(prim) {
-    case 0:
-      image(sprite, x, y, w, h);
-      break;
-    case 1:
-      fill(back);
-      rect(x, y, w, h);
-      fill(text);
-      text(name, x, y + (h - _FONT)/2, w, h);
-      //case 2: fill(255); circle(x, y, w); fill(0); text(name, x, y, w, w);
+    tickEvent();
+  }
+
+  void tickEvent() {
+  }
+
+  void tickUI() {
+  }
+
+  void drawBobishka(float curPos) {
+    if (bob != null) {
+      image(bob, x + curPos, y, 20, h);
+    } else {
+
+      fill(txt);
+      rect(x + curPos, y, 20, h);
     }
+  }
+
+
+  GUIElem setLocales(int x, int y, int w, int h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    return this;
+  }
+
+  GUIElem setLocsRelative(GUIElem rel, int x, int y) {
+    this.x = rel.x + x;
+    this.y = rel.y + y;
+    return this;
+  }
+
+  GUIElem setColor(int bcol, int tcol) {
+    back = bcol;
+    txt = tcol;
+    return this;
+  }
+
+  GUIElem setNameUp(String name) {
+    text = name;
+    return this;
+  }
+
+  GUIElem setRounds(int rounds) {
+    roundsX = rounds;
+    roundsY = rounds;
+    roundsW = rounds;
+    roundsH = rounds;
+    return this;
+  }
+
+  GUIElem setRounds(int rX, int rY, int rW, int rH) {
+    roundsX = rX;
+    roundsY = rY;
+    roundsW = rW;
+    roundsH = rH;
+    return this;
+  }
+
+  GUIElem setImage(PImage img) {
+    this.img = img;
+    return this;
   }
 
   void move(int deltaX, int deltaY) {
@@ -67,99 +135,104 @@ class Button {
   }
 }
 
-class Slider {
-  PImage bg, fg;
-  int x, y, w, h;
+class Button extends GUIElem {
+  String func;
+  boolean flag;
+
+  Button(int px, int py, int pw, int ph, int bcol, int col, String name, String func) {
+    super(px, py, pw, ph, bcol, col, name);
+    this.func = func;
+  }
+
+  Button(int px, int py, int pw, int ph, String name, String func) {
+    super(px, py, pw, ph, name);
+    this.func = func;
+  }
+
+  Button(String name, String func) {
+    super(name);
+    this.func = func;
+  }
+
+  Button(int px, int py, int pw, int ph, int bcol, int col, String func) {
+    super(px, py, pw, ph, bcol, col, func);
+    this.func = func;
+  }
+
+  Button(int px, int py, int pw, int ph, String func) {
+    super(px, py, pw, ph, func);
+    this.func = func;
+  }
+
+  Button(String func) {
+    super(func);
+    this.func = func;
+  }
+
+  void tickEvent() {
+    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
+      method(func);
+      flag = mousePressed;
+    } else if (!mousePressed) {
+      flag = false;
+    }
+  }
+}
+
+class Slider extends GUIElem {
   float value, minV, maxV;
   boolean flag;
-  int back, fag, type;
 
-  Slider(PImage b, PImage f, int px, int py, int pw, int ph, float minValue, float maxValue) {
-    bg = b;
-    fg = f;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    value = 0;
-    minV = minValue;
-    maxV = maxValue;
-    type = 0;
+  Slider(int px, int py, int pw, int ph, int bcol, int col, String name, float minV, float maxV) {
+    super(px, py, pw, ph, bcol, col, name);
+    this.minV = minV;
+    this.maxV = maxV;
   }
 
-  Slider(int b, int f, int px, int py, int pw, int ph, float minValue, float maxValue) {
-    back = b;
-    fag = f;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    value = 0;
-    minV = minValue;
-    maxV = maxValue;
-    type = 1;
+  Slider(int px, int py, int pw, int ph, String name, float minV, float maxV) {
+    super(px, py, pw, ph, name);
+    this.minV = minV;
+    this.maxV = maxV;
   }
 
-  void tick() {
-    float curPos = (value + minV) / (abs(minV) + abs(maxV));
+  Slider(String name, float minV, float maxV) {
+    super(name);
+    this.minV = minV;
+    this.maxV = maxV;
+  }
+
+  void tickEvent() {
+    float curPos = (value - minV) / (abs(minV) + abs(maxV));
     curPos *= (w - 20);
-    if ((mouseOPressed || flag) && abs((x + (w >> 1)) - mouseX) <= w && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
-      value += (((float) (mouseX - curPos - x) / w) * (abs(minV) + abs(maxV))) - minV;
+    if ((mouseOPressed || flag) && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
+      value += (((float) (mouseX - curPos - x) / w) * (abs(minV) + abs(maxV)));
       value = clamp(value, minV, maxV);
       flag = true;
     } else {
       flag = false;
     }
 
-    switch(type) {
-    case 0:
-      image(bg, x, y, w, h);
-      image(fg, x + curPos, y, 20, h);
-      break;
-    case 1:
-      fill(back);
-      rect(x, y, w, h);
-      fill(fag);
-      rect(x + curPos, y, 20, h);
-      break;
-    }
-  }
-
-  void move(int deltaX, int deltaY) {
-    x += deltaX;
-    y += deltaY;
+    drawBobishka(curPos);
   }
 }
 
-class Toggle {
-  PImage bg, fg;
-  int x, y, w, h;
+class Toggle extends GUIElem {
+
   boolean flag, value;
-  int back, fag, type;
 
-  Toggle(PImage b, PImage f, int px, int py, int pw, int ph) {
-    bg = b;
-    fg = f;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    flag = false;
-    type = 0;
+  Toggle(int px, int py, int pw, int ph, int bcol, int col, String name) {
+    super(px, py, pw, ph, bcol, col, name);
   }
 
-  Toggle(int b, int f, int px, int py, int pw, int ph) {
-    back = b;
-    fag = f;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    flag = false;
-    type = 1;
+  Toggle(int px, int py, int pw, int ph, String name) {
+    super(px, py, pw, ph, name);
   }
 
-  void tick() {
+  Toggle(String name) {
+    super(name);
+  }
+
+  void tickEvent() {
     if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
       value = !value;
       flag = mousePressed;
@@ -167,210 +240,94 @@ class Toggle {
       flag = false;
     }
 
-    switch(type) {
-    case 0:
-      image(bg, x, y, w, h);
-      image(fg, value ? x + w - 20 : x, y, 20, h);
-
-      break;
-    case 1:
-      fill(back);
-      rect(x, y, w, h);
-      fill(fag);
-      rect(value ? x + w - 20 : x, y, 20, h);
-      break;
-    }
-  }
-
-  void move(int deltaX, int deltaY) {
-    x += deltaX;
-    y += deltaY;
+    drawBobishka(value ? w - 20 : 0);
   }
 }
 
-class Dropdown {
-  int x, y, w, h, d, back = color(75, 75, 200), fag = 255;
+class Dropdown extends GUIElem {
   boolean open, flag;
   String[] mens;
-  int value;
+  int value, d;
 
-  Dropdown(String[] values, int px, int py, int pw, int ph, int dh) {
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    d = dh;
-    mens = values;
+  Dropdown(int px, int py, int pw, int ph, int bcol, int col, String[] name, int d) {
+    super(px, py, pw, ph, bcol, col, name[0]);
+    mens = name;
+    this.d = d;
   }
 
-  void tick() {
-    if (mousePressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= w && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
+  Dropdown(int px, int py, int pw, int ph, String[] name, int d) {
+    super(px, py, pw, ph, name[0]);
+    mens = name;
+    this.d = d;
+  }
+
+  Dropdown(String[] name) {
+    super(name[0]);
+    mens = name;
+    d = h;
+  }
+
+  void tickEvent() {
+    if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w/2 && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
       open = !open;
-      flag = mousePressed;
-    } else if (!mousePressed) {
+      flag = mouseOPressed;
+    } else if (!mouseOPressed) {
       flag = false;
     }
 
     if (open) {
       for (int i = 0; i < mens.length; i++) {
         int yn = y + d * (i+1);
+
         fill(back);
         rect(x, yn, w, h);
-        fill(fag);
+        fill(txt);
         text(mens[i], x, yn + (h - _FONT)/2, w, h);
-        if (mousePressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
+
+        if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
           value = i;
           open = false;
-          flag = mousePressed;
-        } else if (!mousePressed) {
+          flag = mouseOPressed;
+        } else if (!mouseOPressed) {
           flag = false;
         }
       }
     }
-    fill(back);
-    rect(x, y, w, h);
-    fill(fag);
-    text(mens[value], x, y + (h - _FONT)/2, w, h);
-  }
 
-  void move(int deltaX, int deltaY) {
-    x += deltaX;
-    y += deltaY;
+
+    text = mens[value];
   }
 }
 
-class Window {
-  boolean flag = false;
-  int x, y, w, h, d, bcol, tcol, tDX, tDY;
-  String name;
-  boolean preventOverlapping = false;
-  Slider[] slds;
-  Button[] btns;
-  Toggle[] togs;
-  Dropdown[] drops;
+class TextField extends GUIElem {
 
-  Window(String name1, int px, int py, int pw, int ph, int dh) {
-    name = name1;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    d = dh;
-    bcol = color(200, 200, 200, 127);
-    tcol = 120;
-  }
-
-  void tick() {
-    fill(bcol);
-    rect(x, y, w, h);
-    fill(tcol);
-    rect(x, y, w, d);
-    fill(255);
-    text(name, x, y + (h - _FONT)/2, w, h);
-    if (flag || (mouseOPressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (d >> 1)) - mouseY) <= (d / 2))) {
-      if (!mousePressed) {
-        flag = false;
-        return;
-      }
-      if (!flag) {
-        tDX = mouseX - x;
-        tDY = mouseY - y;
-      }
-      int deltaX = mouseX - x - tDX;
-      int deltaY = mouseY - y - tDY;
-
-      if (preventOverlapping) {
-        //preventOverlap();
-      }
-
-      for (int i = 0; i < slds.length; i++) {
-        slds[i].move(deltaX, deltaY);
-      }
-      for (int i = 0; i < btns.length; i++) {
-        btns[i].move(deltaX, deltaY);
-      }
-      for (int i = 0; i < togs.length; i++) {
-        togs[i].move(deltaX, deltaY);
-      }
-      for (int i = 0; i < drops.length; i++) {
-        drops[i].move(deltaX, deltaY);
-      }
-      x += deltaX;
-      y += deltaY;
-      flag = true;
-    }
-
-    for (int i = 0; i < slds.length; i++) {
-      slds[i].tick();
-    }
-    for (int i = 0; i < btns.length; i++) {
-      btns[i].tick();
-    }
-    for (int i = 0; i < togs.length; i++) {
-      togs[i].tick();
-    }
-    for (int i = 0; i < drops.length; i++) {
-      drops[i].tick();
-    }
-  }
-
-  boolean isOverlapping(Window other) {
-    return !(x + w < other.x || x > other.x + other.w || y + h < other.y || y > other.y + other.h);
-  }
-}
-
-class Tab {
-  String[] subTabs;
-  int x, y, w, h, d, value;
-  boolean flag;
-
-  Tab(String[] subTb, int px, int py, int pw, int ph, int dw) {
-    subTabs = subTb;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    d = dw;
-  }
-
-  void tick() {
-    for (int i = 0; i < subTabs.length; i++) {
-      int xn = x + i * d;
-      fill(255);
-      rect(xn, y, d, h);
-      fill(0);
-      text(subTabs[i], xn, y + (h - _FONT)/2, w, h);
-
-      if (mousePressed && flag != mousePressed && abs((xn + (d >> 1)) - mouseX) <= (d/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
-        value = i;
-        flag = mousePressed;
-      } else if (!mousePressed) {
-        flag = false;
-      }
-    }
-    method(subTabs[value]);
-  }
-}
-
-class TextField {
-
-  char[] value;
-  int cnt, trc;
-  int x, y, w, h, tmr = 0;
-  boolean flag = false, isTaken;
-
-
-  TextField(int px, int py, int pw, int ph, int buf) {
+  TextField(int px, int py, int pw, int ph, int bcol, int col, String name, int buf) {
+    super(px, py, pw, ph, bcol, col, name);
     cnt = 0;
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
     value = new char[buf + 1];
     value[0] = '\0';
   }
 
-  void tick() {
+  TextField(int px, int py, int pw, int ph, String name, int buf) {
+    super(px, py, pw, ph, name);
+    cnt = 0;
+    value = new char[buf + 1];
+    value[0] = '\0';
+  }
+
+  TextField(String name, int buf) {
+    super(name);
+    cnt = 0;
+    value = new char[buf + 1];
+    value[0] = '\0';
+  }
+
+  char[] value;
+  int cnt, trc;
+  int tmr = 0;
+  boolean flag = false, isTaken;
+
+  void tickEvent() {
     if (isTaken) {
       if (keyPressed && (!flag || millis() - tmr >= 200)) {
         flag = true;
@@ -400,24 +357,17 @@ class TextField {
         flag = false;
       }
 
-      if (mouseOPressed) {
-        isTaken = false;
-      }
+      if (mouseOPressed) isTaken = false;
     }
 
-    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
-      isTaken = true;
-    }
+    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) isTaken = true;
 
-    fill(50);
-    rect(x, y, w, h);
-    fill(255);
+    fill(txt);
     text(value, 0, cnt, x, y +(h + _FONT/2)/2);
-    stroke(255);
+    stroke(txt);
     line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
     stroke(0);
   }
-
 
   int parseInt() {
     int result = 0;
@@ -445,6 +395,152 @@ class TextField {
   }
 }
 
+class Plotter extends GUIElem {
+  int buf, dtm, tc;
+  float[] dots;
+  float value, tv, ix;
+
+  Plotter(int px, int py, int pw, int ph, int bcol, int col, String name, int dotCount, int tickCount, float min, float max) {
+    super(px, py, pw, ph, bcol, col, name);
+    dots = new float[dotCount];
+    dtm = dotCount;
+    tc = tickCount;
+    tv = (max - min) / tc;
+    ix = min;
+  }
+
+  Plotter(int px, int py, int pw, int ph, String name, int dotCount, int tickCount, float min, float max) {
+    super(px, py, pw, ph, name);
+    dots = new float[dotCount];
+    dtm = dotCount;
+    tc = tickCount;
+    tv = (max - min) / tc;
+    ix = min;
+  }
+
+  Plotter(String name, int dotCount, int tickCount, float min, float max) {
+    super(name);
+    dots = new float[dotCount];
+    dtm = dotCount;
+    tc = tickCount;
+    tv = (max - min) / tc;
+    ix = min;
+  }
+
+  void tick() {
+    buf = (buf + 1) % dtm;
+    dots[buf] = value;
+    fill(255);
+    rect(x, y, w, h);
+    fill(0);
+    for (int i = 0; i < dtm; i++) circle(i*3 + x, -dots[(buf + i) % dtm] * (h*0.4) + y + h/2, 2);
+    int ttc = h / tc;
+    for (int i = 0; i <= tc; i++) text(int(ix + tv * i), x - 45, y + ttc * (tc - i));
+  }
+}
+
+class Window extends GUIElem {
+  Window(int px, int py, int pw, int ph, int d, int bcol, int col, String name) {
+    super(px, py, pw, ph, bcol, col, name);
+    this.d = d;
+  }
+
+  Window(int px, int py, int pw, int ph, int d, String name) {
+    super(px, py, pw, ph, name);
+    this.d = d;
+  }
+
+  Window(String name, int d) {
+    super(name);
+    this.d = d;
+  }
+
+  boolean flag = false;
+  int d, tDX, tDY, delX, delY;
+
+  GUIElem[] elems;
+
+  void tickEvent() {
+    if (flag || (mouseOPressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (d >> 1)) - mouseY) <= (d / 2))) {
+      if (!mousePressed) {
+        flag = false;
+        delX = 0;
+        delY = 0;
+        return;
+      }
+      if (!flag) {
+        tDX = mouseX - x;
+        tDY = mouseY - y;
+      }
+      flag = true;
+      delX = mouseX - x - tDX;
+      delY = mouseY - y - tDY;
+      move();
+    }
+
+    if (elems != null) for (int i = 0; i < elems.length; i++) {
+      elems[i].tick();
+    }
+  }
+
+  void tickUI() {
+    fill(txt);
+    rect(x, y, w, d);
+  }
+
+  void move() {
+    if (elems != null) for (int i = 0; i < elems.length; i++) elems[i].move(delX, delY);
+    x += delX;
+    y += delY;
+  }
+
+  boolean isOverlapping(Window other) {
+    return (!(x + w < other.x || x > other.x + other.w || y + h < other.y || y > other.y + other.h));
+  }
+}
+
+class Tab extends GUIElem {
+  String[] subTabs;
+  int d, value;
+  boolean flag;
+
+  Tab(int px, int py, int pw, int ph, int bcol, int col, String[] name, int dw) {
+    super(px, py, pw, ph, bcol, col, "");
+    subTabs = name;
+    d = dw;
+  }
+
+  Tab(int px, int py, int pw, int ph, String[] name, int dw) {
+    super(px, py, pw, ph, "");
+    subTabs = name;
+    d = dw;
+  }
+
+  Tab(String[] name, int dw) {
+    super("");
+    subTabs = name;
+    d = dw;
+  }
+
+  void tickEvent() {
+    for (int i = 0; i < subTabs.length; i++) {
+      int xn = x + i * d;
+      fill(255);
+      rect(xn, y, d, h);
+      fill(0);
+      text(subTabs[i], xn, y + (h - _FONT)/2, w, h);
+
+      if (mouseOPressed && flag != mouseOPressed && abs((xn + (d >> 1)) - mouseX) <= (d/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
+        value = i;
+        flag = mouseOPressed;
+      } else if (!mouseOPressed) {
+        flag = false;
+      }
+    }
+    method(subTabs[value]);
+  }
+}
+
 class MainMenu {
   String[] top_text;
   String[][] funcs;
@@ -466,10 +562,13 @@ class MainMenu {
 
   void tick() {
     for (int i = 0; i < top_text.length; i++) {
-
       if (mouseOPressed && spamclick != mousePressed && abs((i * (20 * top_text[i].length()) + (20 * top_text[i].length() >> 1)) - mouseX) <= (10 * top_text[i].length()) && abs(15 - mouseY) <= 15) {
+
+        if (i != value) {
+          flg[i] = true;
+          flg[value] = false;
+        } else flg[i] = !flg[i];
         value = i;
-        flg[i] = !flg[i];
         closer = true;
         spamclick = mousePressed;
       } else {
@@ -489,8 +588,6 @@ class MainMenu {
         }
       }
 
-
-
       rect(i * (20 * top_text[i].length()), 0, 20 * top_text[i].length(), 30);
       fill(0);
       text(top_text[i], i * (20 * top_text[i].length()), (30 - _FONT/2));
@@ -499,51 +596,23 @@ class MainMenu {
   }
 }
 
-class Plotter {
-  int x, y, w, h, buf, dtm, tc;
-  float[] dots;
-  float value, tv, ix;
-
-  Plotter(int px, int py, int pw, int ph, int dotCount, int tickCount, float min, float max) {
-    dots = new float[dotCount];
-    x = px;
-    y = py;
-    w = pw;
-    h = ph;
-    dtm = dotCount;
-    tc = tickCount;
-    tv = (max - min) / tc;
-    ix = min;
-  }
-
-  void tick() {
-    buf = (buf + 1) % dtm;
-    dots[buf] = value;
-    fill(255);
-    rect(x, y, w, h);
-    fill(0);
-    for (int i = 0; i < dtm; i++) {
-      circle(i*3 + x, -dots[(buf + i) % dtm] * (h*0.4) + y + h/2, 2);
-    }
-    int ttc = h / tc;
-    for(int i = 0; i <= tc; i++){
-      text(int(ix + tv * i), x - 45, y + ttc * (tc - i));
-    }
-  }
-}
 
 float clamp(float val, float minV, float maxV) {
   return min(max(val, minV), maxV);
 }
 
+int clamp(int val, int minV, int maxV) {
+  return min(max(val, minV), maxV);
+}
+
 void freeKey(char[] value, int snuf) {
   for (int i = value.length-1; i > snuf; i--) {
-    value[i] = value[i - 1];
+    value[i] = value[clamp(i - 1, i, value.length-1)];
   }
 }
 
 void deleteKey(char[] value, int snuf) {
-  for (int i = snuf; i < value.length - 1; i++) {
-    value[i] = value[i + 1];
+  for (int i = clamp(snuf, 0, value.length-1); i < value.length - 1; i++) {
+    value[i] = value[clamp(i + 1, i, value.length-1)];
   }
 }
