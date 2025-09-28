@@ -1,6 +1,12 @@
 boolean mouseOPressed = false, mp1 = false;
 
 int _FONT = 16;
+boolean _STRK = true;
+PShader G_BLUR;
+
+void loadConsts(){
+   G_BLUR = loadShader("blur.glsl");
+}
 
 void win_tick() {
   if (!mp1 && mousePressed) {
@@ -13,8 +19,21 @@ void win_tick() {
   }
 }
 
+void niceLooks(){
+  _STRK = false;
+  noStroke();
+  lights();
+}
+
+void niceLight(){
+  pointLight(230, 230, 230, width/2, height/2, 504);
+  ambient(120);
+  specular(120);
+}
+
 class GUIElem {
   int x, y, w, h;
+  int shadsX, shadsY, stX, stY;
   int roundsX, roundsY, roundsW, roundsH;
   int back, txt;
   String text;
@@ -51,7 +70,14 @@ class GUIElem {
   }
 
   void tick() {
-    tickUI();
+    if(shadsX != 0 || shadsY != 0){
+      fill(0);
+      if(_STRK) noStroke();
+      shader(G_BLUR);
+      rect(x + shadsX, y + shadsY, w, h, roundsX, roundsY, roundsW, roundsH);
+      resetShader();
+      if(_STRK) stroke(0);
+    }
     if (img != null) {
       image(img, x, y, w, h, roundsX, roundsY, roundsW, roundsH);
     } else {
@@ -59,9 +85,11 @@ class GUIElem {
       rect(x, y, w, h, roundsX, roundsY, roundsW, roundsH);
       if (text != "") {
         fill(txt);
-        text(text, x, y, w, h);
+        text(text, x + stX, y + stY, w, h);
       }
     }
+    //fill(255); 
+    tickUI();
 
     tickEvent();
   }
@@ -126,6 +154,18 @@ class GUIElem {
 
   GUIElem setImage(PImage img) {
     this.img = img;
+    return this;
+  }
+  
+  GUIElem setShadows(int px, int py){
+    shadsX = px;
+    shadsY = py;
+    return this;
+  }
+  
+  GUIElem shiftText(int px, int py){
+    stX = px;
+    stY = py;
     return this;
   }
 
@@ -364,9 +404,9 @@ class TextField extends GUIElem {
 
     fill(txt);
     text(value, 0, cnt, x, y +(h + _FONT/2)/2);
-    stroke(txt);
+    if(_STRK) stroke(txt);
     line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
-    stroke(0);
+    if(_STRK) stroke(0);
   }
 
   int parseInt() {
@@ -484,7 +524,7 @@ class Window extends GUIElem {
   }
 
   void tickUI() {
-    fill(txt);
+    noFill();
     rect(x, y, w, d);
   }
 
@@ -561,6 +601,7 @@ class MainMenu {
   }
 
   void tick() {
+    fill(255);
     for (int i = 0; i < top_text.length; i++) {
       if (mouseOPressed && spamclick != mousePressed && abs((i * (20 * top_text[i].length()) + (20 * top_text[i].length() >> 1)) - mouseX) <= (10 * top_text[i].length()) && abs(15 - mouseY) <= 15) {
 

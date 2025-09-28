@@ -13,14 +13,15 @@ boolean animate = false, about, toExit;
 GUIElem el;
 
 void setup() {
+  loadConsts();
+  //noStroke();
   frameRate(60);
   textFont(createFont("Lucida Console", 16));
   size(1000, 500, P3D);
-  
-  lights();
 
   btn = new Button(50, 130, 50, 20, "btn1");
   sld = new Slider(50, 160, 450, 50, color(50, 50, 200), color(200, 50, 50), "sld", -1, 10);
+  sld.shiftText(455, 35);
   tog = new Toggle(50, 220, 100, 30, color(20, 50, 70), color(10, 200, 10), "tog");
   String[] str = {"Item1", "Item2", "Item3"};
   drop = new Dropdown(50, 270, 100, 20, color(75, 75, 200), 255, str, 20);
@@ -57,6 +58,14 @@ void setup() {
 
   el = new GUIElem("MyElem");
   el.setLocales(300, 400, 70, 25).setColor(color(100, 70, 200), color(250, 250, 250)).setRounds(5);
+  
+  
+  btn.setRounds(5)
+    .setShadows(5, 5)
+    .setColor(color(255, 255, 255, 255), color(0, 0, 0, 255));
+  ;
+  
+  niceLooks();
 }
 
 void btn1() {
@@ -80,11 +89,8 @@ void w2() {
 float x = 0, v = 0.1;
 
 void draw() {
-
-  //ambient(120);
-  //specular(120);
   background(120);
-  pointLight(200, 200, 200, 140, 160, 144);
+  niceLight();
   
   if (animate) {
     btn.back = 255;
@@ -109,7 +115,7 @@ void draw() {
   
   if (about) {
     ab.tick();
-    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 Beta\n© NThacker 2025. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
+    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 Beta 2\n© NThacker 2025. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
     if (keyPressed && keyCode == ESC) {
       about = false;
     }
