@@ -71,7 +71,7 @@ class GUIElem {
 
   void tick() {
     if(shadsX != 0 || shadsY != 0){
-      fill(0);
+      fill(color(0, 0, 0, alpha(back)));
       if(_STRK) noStroke();
       shader(G_BLUR);
       rect(x + shadsX, y + shadsY, w, h, roundsX, roundsY, roundsW, roundsH);
@@ -109,7 +109,6 @@ class GUIElem {
       rect(x + curPos, y, 20, h);
     }
   }
-
 
   GUIElem setLocales(int x, int y, int w, int h) {
     this.x = x;
@@ -636,7 +635,6 @@ class MainMenu {
     }
   }
 }
-
 
 float clamp(float val, float minV, float maxV) {
   return min(max(val, minV), maxV);

@@ -8,7 +8,9 @@ TextField txt;
 
 Plotter plt;
 MainMenu menu;
-boolean animate = false, about, toExit;
+boolean about, toExit;
+int animate = 0;
+Animator ani_button;
 
 GUIElem el;
 
@@ -18,10 +20,10 @@ void setup() {
   frameRate(60);
   textFont(createFont("Lucida Console", 16));
   size(1000, 500, P3D);
-
+  
   btn = new Button(50, 130, 50, 20, "btn1");
   sld = new Slider(50, 160, 450, 50, color(50, 50, 200), color(200, 50, 50), "sld", -1, 10);
-  sld.shiftText(455, 35);
+  sld.shiftText(455, 35).setShadows(5, 5);
   tog = new Toggle(50, 220, 100, 30, color(20, 50, 70), color(10, 200, 10), "tog");
   String[] str = {"Item1", "Item2", "Item3"};
   drop = new Dropdown(50, 270, 100, 20, color(75, 75, 200), 255, str, 20);
@@ -36,10 +38,9 @@ void setup() {
   win.elems[1] = sld;
   win.elems[2] = tog;
   win.elems[3] = drop;
-
-
+  
+  ani_button = new Animator(btn, POPUP);
   String[] st = {"w1", "w2"};
-
   tab = new Tab(500, 0, 60, 50, st, 30);
 
   txt = new TextField(250, 400, 250, 50, "", 20);
@@ -69,9 +70,7 @@ void setup() {
 }
 
 void btn1() {
-  animate = true;
-  btn.txt = 255;
-  btn.back = 0;
+  ani_button.begin(10, 5);
   println("Test");
   println(sld.value);
   println(tog.value);
@@ -91,12 +90,7 @@ float x = 0, v = 0.1;
 void draw() {
   background(120);
   niceLight();
-  
-  if (animate) {
-    btn.back = 255;
-    btn.txt = 0;
-    animate = !animate;
-  }
+  ani_button.tick();
 
   win_tick();
   menu.tick();
