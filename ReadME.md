@@ -23,6 +23,8 @@
 <h3>v1.4 Beta 2</h3>
 <h4>Новый метод обработки GUI, изменено определение элементов интерефейса, теперь они наследуют класс GUIElem => есть стандарты элементов (они все могут быть в одном массиве, легче тикать и настраивать комплексные элементы интерфейсов), добавлена настройка классов как GUIElem (см. доку). Появились тени, сдвиги, цвета, установки позиций - читайте доку на GUIElem. В релизной версии добавлю класс Animator.</h4>
 
+P.S. для освещения и красоты в setup нужно вставить функцию `niceLooks()` и в draw `niceLight()`
+
 <ol>
 	<li>Предыстория</li>
 	<li>
@@ -170,6 +172,7 @@ void btn1(){
 
 void draw(){
 	background(120);
+	win_tick();
 	btn.tick(); //тикаем
 }
 
@@ -197,6 +200,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 	if(millis() - tmr >= 100){ //таймер с dt = 100
 		println(sld.value); //читаем значение
 		tmr = millis();
@@ -224,6 +228,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 	if(millis() - tmr >= 200){ //таймер с dt = 200
 		println(tog.value); //читаем значение
 		tmr = millis();
@@ -253,6 +258,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 	if(millis() - tmr >= 500){ //таймер с dt = 500
 		
 		switch(drop.value){
@@ -293,6 +299,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 	if(millis() - tmr >= 2000){ //таймер с dt = 2000
 		println(new String(txt.value));
 		tmr = millis();
@@ -339,6 +346,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 
 	if(serial.available()){
 		plt.value = (float) serial.read();
@@ -389,6 +397,7 @@ void btn1(){
 }
 
 void draw(){
+	win_tick();
 	win.tick();
 }
 
@@ -449,6 +458,7 @@ void w2(){
 }
 
 void draw(){
+	win_tick();
 	tab.tick();
 }
 
@@ -474,6 +484,7 @@ void setup(){
 }
 
 void draw(){
+	win_tick();
 	menu.tick();
 }
 
