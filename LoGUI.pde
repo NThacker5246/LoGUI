@@ -4,8 +4,8 @@ int _FONT = 16;
 boolean _STRK = true;
 PShader G_BLUR;
 
-void loadConsts(){
-   G_BLUR = loadShader("blur.glsl");
+void loadConsts() {
+  G_BLUR = loadShader("blur.glsl");
 }
 
 void win_tick() {
@@ -19,13 +19,13 @@ void win_tick() {
   }
 }
 
-void niceLooks(){
+void niceLooks() {
   _STRK = false;
   noStroke();
   lights();
 }
 
-void niceLight(){
+void niceLight() {
   pointLight(230, 230, 230, width/2, height/2, 504);
   ambient(120);
   specular(120);
@@ -70,13 +70,13 @@ class GUIElem {
   }
 
   void tick() {
-    if(shadsX != 0 || shadsY != 0){
+    if (shadsX != 0 || shadsY != 0) {
       fill(color(0, 0, 0, alpha(back)));
-      if(_STRK) noStroke();
+      if (_STRK) noStroke();
       shader(G_BLUR);
       rect(x + shadsX, y + shadsY, w, h, roundsX, roundsY, roundsW, roundsH);
       resetShader();
-      if(_STRK) stroke(0);
+      if (_STRK) stroke(0);
     }
     if (img != null) {
       image(img, x, y, w, h, roundsX, roundsY, roundsW, roundsH);
@@ -88,9 +88,8 @@ class GUIElem {
         text(text, x + stX, y + stY, w, h);
       }
     }
-    //fill(255); 
+    //fill(255);
     tickUI();
-
     tickEvent();
   }
 
@@ -155,14 +154,14 @@ class GUIElem {
     this.img = img;
     return this;
   }
-  
-  GUIElem setShadows(int px, int py){
+
+  GUIElem setShadows(int px, int py) {
     shadsX = px;
     shadsY = py;
     return this;
   }
-  
-  GUIElem shiftText(int px, int py){
+
+  GUIElem shiftText(int px, int py) {
     stX = px;
     stY = py;
     return this;
@@ -219,8 +218,8 @@ class Button extends GUIElem {
 }
 
 class Slider extends GUIElem {
-  float value, minV, maxV;
-  boolean flag;
+  float value, minV, maxV, anim, fact;
+  boolean flag, animate;
 
   Slider(int px, int py, int pw, int ph, int bcol, int col, String name, float minV, float maxV) {
     super(px, py, pw, ph, bcol, col, name);
@@ -251,13 +250,21 @@ class Slider extends GUIElem {
       flag = false;
     }
 
-    drawBobishka(curPos);
+    drawBobishka(animate ? (anim += (curPos - anim) * fact) : curPos);
+  }
+
+  Slider setAnim(boolean animate, float slowFactor) {
+    this.animate = animate;
+    fact = slowFactor;
+    return this;
   }
 }
 
 class Toggle extends GUIElem {
 
-  boolean flag, value;
+  boolean flag, value, animate;
+
+  float anim, fact;
 
   Toggle(int px, int py, int pw, int ph, int bcol, int col, String name) {
     super(px, py, pw, ph, bcol, col, name);
@@ -278,15 +285,23 @@ class Toggle extends GUIElem {
     } else if (!mousePressed) {
       flag = false;
     }
+    int npos = (value ? w - 20 : 0);
 
-    drawBobishka(value ? w - 20 : 0);
+    drawBobishka(animate ? anim += (npos - anim) * fact : npos);
+  }
+
+  Toggle setAnim(boolean animate, float slowFactor) {
+    this.animate = animate;
+    fact = slowFactor;
+    return this;
   }
 }
 
 class Dropdown extends GUIElem {
-  boolean open, flag;
+  boolean open, flag, animate, canAnimated;
   String[] mens;
   int value, d;
+  float anim, fact;
 
   Dropdown(int px, int py, int pw, int ph, int bcol, int col, String[] name, int d) {
     super(px, py, pw, ph, bcol, col, name[0]);
@@ -308,7 +323,12 @@ class Dropdown extends GUIElem {
 
   void tickEvent() {
     if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w/2 && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
-      open = !open;
+      if (canAnimated) {
+        if (!open) open = true;
+        animate = !animate;
+      } else {
+        open = !open;
+      }
       flag = mouseOPressed;
     } else if (!mouseOPressed) {
       flag = false;
@@ -316,8 +336,22 @@ class Dropdown extends GUIElem {
 
     if (open) {
       for (int i = 0; i < mens.length; i++) {
-        int yn = y + d * (i+1);
+        int yn;
+        if (canAnimated) {
+          anim += ((animate ? 1 : 0) - anim) * fact;
+          yn = (int) (y + (d * (i+1)) * anim);
+          if (!animate && (yn - y) < 2) {
+            open = false;
+          }
+        } else {
+          yn = y + (d * (i+1));
+        }
 
+        print(open);
+        print(", ");
+        print(animate);
+        print(", ");
+        println(yn);
         fill(back);
         rect(x, yn, w, h);
         fill(txt);
@@ -325,16 +359,22 @@ class Dropdown extends GUIElem {
 
         if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
           value = i;
-          open = false;
+          //open = false;
+          if (canAnimated) animate = false;
+          else open = false;
           flag = mouseOPressed;
         } else if (!mouseOPressed) {
           flag = false;
         }
       }
     }
-
-
     text = mens[value];
+  }
+
+  Dropdown setAnim(boolean animate, float slowFactor) {
+    canAnimated = animate;
+    fact = slowFactor;
+    return this;
   }
 }
 
@@ -403,9 +443,9 @@ class TextField extends GUIElem {
 
     fill(txt);
     text(value, 0, cnt, x, y +(h + _FONT/2)/2);
-    if(_STRK) stroke(txt);
+    if (_STRK) stroke(txt);
     line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
-    if(_STRK) stroke(0);
+    if (_STRK) stroke(0);
   }
 
   int parseInt() {
@@ -584,14 +624,25 @@ class MainMenu {
   String[] top_text;
   String[][] funcs;
   int value;
-  boolean spamclick, closer;
+  boolean spamclick, closer, ani;
 
-  boolean[] flg;
+  boolean[] flg, animate;
+  float[] anim;
+  float fact = 0.1;
 
   MainMenu(int count) {
     top_text = new String[count];
     funcs = new String[count][];
     flg = new boolean[count];
+  }
+  MainMenu(int count, float fac) {
+    top_text = new String[count];
+    funcs = new String[count][];
+    flg = new boolean[count];
+    animate = new boolean[count];
+    anim = new float[count];
+    ani = true;
+    fact = fac;
   }
 
   void addNextMenu(int id, String name, String[] dropNames) {
@@ -603,11 +654,22 @@ class MainMenu {
     fill(255);
     for (int i = 0; i < top_text.length; i++) {
       if (mouseOPressed && spamclick != mousePressed && abs((i * (20 * top_text[i].length()) + (20 * top_text[i].length() >> 1)) - mouseX) <= (10 * top_text[i].length()) && abs(15 - mouseY) <= 15) {
-
         if (i != value) {
-          flg[i] = true;
-          flg[value] = false;
-        } else flg[i] = !flg[i];
+          if (ani) {
+            animate[i] = true;
+            animate[value] = false;
+            flg[i] = true;
+          } else {
+            flg[i] = true;
+            flg[value] = false;
+          }
+        } else {
+
+          if (ani) {
+            animate[i] = !animate[i];
+            flg[i] = true;
+          } else flg[i] = !flg[i];
+        }
         value = i;
         closer = true;
         spamclick = mousePressed;
@@ -616,10 +678,22 @@ class MainMenu {
       }
 
       if (flg[i]) {
+        if (ani) {
+          if (animate[i]) {
+            anim[i] += (1 - anim[i]) * fact;
+          } else {
+            anim[i] += (0 - anim[i]) * fact;
+            if (anim[i] < 0.01) {
+              flg[i] = false;
+            }
+          }
+        }
+
         for (int j = 0; j < funcs[i].length; j++) {
-          rect(i * (20 * top_text[i].length()), 30 + j * 30, 20 * top_text[i].length(), 30);
+
+          rect(i * (20 * top_text[i].length()), ((j+1) * 30) * (ani ? anim[i] : 1), 20 * top_text[i].length(), 30);
           fill(0);
-          text(funcs[i][j], i * (20 * top_text[i].length()), 30 + j * 30 + (30 - _FONT/2));
+          text(funcs[i][j], i * (20 * top_text[i].length()), ((j+1) * 30) * (ani ? anim[i] : 1) + (30 - _FONT/2));
           fill(255);
           if (mouseOPressed && spamclick != mousePressed && abs((i * (20 * top_text[i].length()) + (20 * top_text[i].length() >> 1)) - mouseX) <= (10 * top_text[i].length()) && abs(30*0.75 + 30 + j * 30 - mouseY) <= 15) {
             method(funcs[i][j]);

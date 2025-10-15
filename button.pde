@@ -39,7 +39,7 @@ void setup() {
   win.elems[2] = tog;
   win.elems[3] = drop;
   
-  ani_button = new Animator(btn, POPUP);
+  ani_button = new Animator(btn, COLOR_CHANGE);
   String[] st = {"w1", "w2"};
   tab = new Tab(500, 0, 60, 50, st, 30);
 
@@ -47,7 +47,7 @@ void setup() {
   win2.elems = new GUIElem[1];
   win2.elems[0] = txt;
 
-  menu = new MainMenu(3);
+  menu = new MainMenu(3, 0.1);
   String[] fl = {"New", "Open", "Save"};
   String[] ed = {"Copy", "Paste"};
   String[] hp = {"About"};
@@ -67,10 +67,14 @@ void setup() {
   ;
   
   niceLooks();
+  
+  sld.setAnim(true, 0.65);
+  tog.setAnim(true, 0.65);
+  drop.setAnim(true, 0.1);
 }
 
 void btn1() {
-  ani_button.begin(10, 5);
+  ani_button.begin(10);
   println("Test");
   println(sld.value);
   println(tog.value);
@@ -109,7 +113,7 @@ void draw() {
   
   if (about) {
     ab.tick();
-    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 Beta 2\n© NThacker 2025. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
+    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 RTM candidate\n© NThacker 2025-26. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
     if (keyPressed && keyCode == ESC) {
       about = false;
     }
