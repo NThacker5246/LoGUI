@@ -4,7 +4,7 @@
 	<li><a href="#en">English (tap here)</a></li>
 </ul>
 
-<h1>LoGUI 1.3</h1>
+<h1>LoGUI 1.4</h1>
 <h2>Библиотека Processing для пользовательского интерфейса</b>
 
 <img src="read.png">
