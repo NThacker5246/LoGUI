@@ -32,7 +32,7 @@ void niceLight() {
 }
 
 class GUIElem {
-  int x, y, w, h;
+  int x, y, w, h, d;
 
   int globalX, globalY;
 

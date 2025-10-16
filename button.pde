@@ -8,9 +8,9 @@ TextField txt;
 
 Plotter plt;
 MainMenu menu;
-boolean about, toExit;
+boolean about, toExit, butanim;
 int animate = 0;
-Animator ani_button;
+Animator ani_button, aboutAnim;
 
 GUIElem el;
 
@@ -44,7 +44,7 @@ void setup() {
   tog.addParent(win, false);
   drop.addParent(win, false);
   
-  ani_button = new Animator(btn, COLOR_CHANGE);
+  ani_button = new Animator(btn, POPUP);
   String[] st = {"w1", "w2"};
   tab = new Tab(500, 0, 60, 50, st, 30);
 
@@ -65,7 +65,7 @@ void setup() {
   menu.addNextMenu(1, "Edit", ed);
   menu.addNextMenu(2, "Help", hp);
 
-  ab = new Window(width/4, height/4, width/2, height/2, 20, "About LoGUI");
+  ab = new Window(width/2 - width/10, height/2 - height / 10, width/10, height/10, 20, "About LoGUI");
 
   el = new GUIElem("MyElem");
   el.setLocales(300, 400, 70, 25).setColor(color(100, 70, 200), color(250, 250, 250)).setRounds(5);
@@ -81,10 +81,13 @@ void setup() {
   sld.setAnim(true, 0.65);
   tog.setAnim(true, 0.65);
   drop.setAnim(true, 0.1);
+  
+  aboutAnim = new Animator(ab, POPUP);
 }
 
 void btn1() {
-  ani_button.begin(10);
+  ani_button.begin(10, butanim ? 0.2 : 5);
+  butanim = !butanim;
   println("Test");
   println(sld.value);
   println(tog.value);
@@ -120,25 +123,24 @@ void draw() {
   //plt.tick();
   
   el.tick();
+  aboutAnim.tick();
   
   if (about) {
     ab.tick();
     fill(0);
-    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.5 beta 2\n© NThacker 2025-26. C0d9d by NTh6ck9r", ab.globalX, ab.globalY, ab.w, ab.d);
-    if (keyPressed && keyCode == ESC) {
-      about = false;
-    }
+    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.5 beta 3\n© NThacker 2025-26. C0d9d by NTh6ck9r", ab.globalX, ab.globalY, ab.w, ab.h);
   }  
   if (toExit) {
     ab.tick();
     fill(0);
-    text("\nTo exit press Y. To close this win, click N", ab.globalX, ab.globalY, ab.w, ab.d);
+    text("\nTo exit press Y. To close this win, click N", ab.globalX, ab.globalY, ab.w, ab.h);
     if (keyPressed && key == 'y') {
       launch("taskkill /im java.exe /f");
       println("NT");
     }
     if (keyPressed && key == 'n') {
       toExit = false;
+      aboutAnim.begin(10, 0.2);
     }
   }
 }
@@ -166,12 +168,17 @@ void New() {
 
 void About() {
   about = true;
+  aboutAnim.begin(10, 5);
   //println("Powered by HackerGUI (LoGUI) lib");
   //println("Version 1.4 Beta");
   //println("© NThacker 2025. C0d9d by NTh6ck9r");
 }
 
 void exit() {
-  toExit = true;
-  println("there");
+  if(about) {aboutAnim.begin(10, 0.2); about = false;}
+  else {
+    toExit = true;
+    aboutAnim.begin(10, 5);
+    println("there");
+  }
 }

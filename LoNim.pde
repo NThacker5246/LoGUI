@@ -4,11 +4,17 @@ class Animator {
   GUIElem el;
   int type, state, booted, c1, c2, x, y, w, h;
   float scale;
-
+  boolean isWin;
 
   Animator(GUIElem el, int type) {
     this.el = el;
     this.type = type;
+  }
+  
+  Animator(GUIElem el, int type, boolean isWin) {
+    this.el = el;
+    this.type = type;
+    this.isWin = isWin;
   }
 
   void tick() {
@@ -36,10 +42,11 @@ class Animator {
         break;
 
       case POPUP:
-        el.x = (int) (x / scale);
-        el.y = (int) (y / scale);
+        el.x = (int) (x - w*scale/2);
+        el.y = (int) (y - h*scale/2);
         el.w = (int) (w * scale);
-        el.h = (int) (h * scale);
+        if(isWin) el.d = (int) (h * scale);
+        else el.h = (int) (h * scale);
         break;
       }
     } else if (state > 0) {
@@ -64,10 +71,11 @@ class Animator {
 
       case POPUP:
         float size = ((float) state / (float) booted) * scale;
-        el.x = (int) (x / size);
-        el.y = (int) (y / size);
+        el.x = (int) (x - w*size/2);
+        el.y = (int) (y - h*size/2);
         el.w = (int) (w * size);
-        el.h = (int) (h * size);
+        if(isWin) el.d = (int) (h * scale);
+        else el.h = (int) (h * scale);
         break;
       }
     }
