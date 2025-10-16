@@ -21,16 +21,16 @@ void setup() {
   textFont(createFont("Lucida Console", 16));
   size(1000, 500, P3D);
   
-  btn = new Button(50, 130, 50, 20, "btn1");
-  sld = new Slider(50, 160, 450, 50, color(50, 50, 200), color(200, 50, 50), "sld", -1, 10);
+  btn = new Button(5, 25, 50, 20, "btn1");
+  sld = new Slider(5, 55, 450, 50, color(50, 50, 200), color(200, 50, 50), "sld", -1, 10);
   sld.shiftText(455, 35).setShadows(5, 5);
-  tog = new Toggle(50, 220, 100, 30, color(20, 50, 70), color(10, 200, 10), "tog");
+  tog = new Toggle(5, 120, 100, 30, color(20, 50, 70), color(10, 200, 10), "tog");
   String[] str = {"Item1", "Item2", "Item3"};
-  drop = new Dropdown(50, 270, 100, 20, color(75, 75, 200), 255, str, 20);
-  win = new Window( 50, 100, 500, 200, 20, "Test.exe");
+  drop = new Dropdown(5, 160, 100, 20, color(75, 75, 200), 255, str, 20);
+  win = new Window(50, 100, 500, 200, 20, "Test.exe");
   win2 = new Window(700, 100, 500, 200, 20, "Default.exe");
 
-  plt = new Plotter(750, 100, 100, 200, 255, 0, "", 34, 5, 0, 255);
+  plt = new Plotter(300, 0, 100, 200, 255, 0, "", 34, 5, 0, 255);
 
   win.elems = new GUIElem[4];
  
@@ -39,13 +39,23 @@ void setup() {
   win.elems[2] = tog;
   win.elems[3] = drop;
   
+  btn.addParent(win, false);
+  sld.addParent(win, false);
+  tog.addParent(win, false);
+  drop.addParent(win, false);
+  
   ani_button = new Animator(btn, COLOR_CHANGE);
   String[] st = {"w1", "w2"};
   tab = new Tab(500, 0, 60, 50, st, 30);
 
-  txt = new TextField(250, 400, 250, 50, "", 20);
-  win2.elems = new GUIElem[1];
+  txt = new TextField(5, 30, 250, 50, "", 20);
+  win2.elems = new GUIElem[2];
   win2.elems[0] = txt;
+  win2.elems[1] = plt;
+  txt.addParent(win2, false);
+  plt.addParent(win2, false);
+
+  win2.addParentRelative(win, false);
 
   menu = new MainMenu(3, 0.1);
   String[] fl = {"New", "Open", "Save"};
@@ -100,27 +110,29 @@ void draw() {
   menu.tick();
   win2.tick();
   tab.tick();
-  txt.tick();
+  //txt.tick();
 
   x = x + v;
   if (abs(x) > 1) {
     v *= -1;
   }
   plt.value += (((random(2)) - 1) - plt.value) * 0.1;
-  plt.tick();
+  //plt.tick();
   
   el.tick();
   
   if (about) {
     ab.tick();
-    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.4 RTM candidate\n© NThacker 2025-26. C0d9d by NTh6ck9r", ab.x, ab.y, ab.w, ab.h);
+    fill(0);
+    text("\nPowered by LoGUI (HackerGUI leg) lib\nVersion 1.5 beta 2\n© NThacker 2025-26. C0d9d by NTh6ck9r", ab.globalX, ab.globalY, ab.w, ab.d);
     if (keyPressed && keyCode == ESC) {
       about = false;
     }
   }  
   if (toExit) {
     ab.tick();
-    text("\nTo exit press Y. To close this win, click N", ab.x, ab.y, ab.w, ab.h);
+    fill(0);
+    text("\nTo exit press Y. To close this win, click N", ab.globalX, ab.globalY, ab.w, ab.d);
     if (keyPressed && key == 'y') {
       launch("taskkill /im java.exe /f");
       println("NT");

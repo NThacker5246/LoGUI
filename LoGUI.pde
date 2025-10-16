@@ -33,11 +33,16 @@ void niceLight() {
 
 class GUIElem {
   int x, y, w, h;
+
+  int globalX, globalY;
+
   int shadsX, shadsY, stX, stY;
   int roundsX, roundsY, roundsW, roundsH;
   int back, txt;
   String text;
   PImage img, bob;
+  GUIElem parent;
+  byte FLAGS;
 
   GUIElem(int px, int py, int pw, int ph, int bcol, int col, String name) {
     x = px;
@@ -70,26 +75,31 @@ class GUIElem {
   }
 
   void tick() {
+    boolean hasElem = (FLAGS & 1) != 0 && (FLAGS & 2) == 0;
+    int parentX = (hasElem ? parent.globalX : 0);
+    int parentY = (hasElem ? parent.globalY : 0);
+    globalX = x + parentX;
+    globalY = y + parentY;
+    tickUI();
     if (shadsX != 0 || shadsY != 0) {
       fill(color(0, 0, 0, alpha(back)));
       if (_STRK) noStroke();
       shader(G_BLUR);
-      rect(x + shadsX, y + shadsY, w, h, roundsX, roundsY, roundsW, roundsH);
+      rect(globalX + shadsX, globalY + shadsY, w, h, roundsX, roundsY, roundsW, roundsH);
       resetShader();
       if (_STRK) stroke(0);
     }
     if (img != null) {
-      image(img, x, y, w, h, roundsX, roundsY, roundsW, roundsH);
+      image(img, globalX, globalY, w, h, roundsX, roundsY, roundsW, roundsH);
     } else {
       fill(back);
-      rect(x, y, w, h, roundsX, roundsY, roundsW, roundsH);
+      rect(globalX, globalY, w, h, roundsX, roundsY, roundsW, roundsH);
       if (text != "") {
         fill(txt);
-        text(text, x + stX, y + stY, w, h);
+        text(text, globalX + stX, globalY + stY, w, h);
       }
     }
     //fill(255);
-    tickUI();
     tickEvent();
   }
 
@@ -100,12 +110,12 @@ class GUIElem {
   }
 
   void drawBobishka(float curPos) {
+    boolean hasElem = (FLAGS & 1) != 0 && (FLAGS & 2) == 0;
     if (bob != null) {
-      image(bob, x + curPos, y, 20, h);
+      image(bob, x + curPos + (hasElem ? parent.x : 0), y + (hasElem ? parent.y : 0), 20, h);
     } else {
-
       fill(txt);
-      rect(x + curPos, y, 20, h);
+      rect(x + curPos + (hasElem ? parent.x : 0), y + (hasElem ? parent.y : 0), 20, h);
     }
   }
 
@@ -171,6 +181,25 @@ class GUIElem {
     x += deltaX;
     y += deltaY;
   }
+
+  GUIElem addParent(GUIElem el, boolean absolute) {
+    this.parent = el;
+    FLAGS |= 1;
+    if (absolute) FLAGS |= 2;
+    else FLAGS &= (byte) ~2;
+    return this;
+  }
+
+  GUIElem addParentRelative(GUIElem el, boolean absolute) {
+    this.parent = el;
+    FLAGS |= 1;
+    if (absolute) FLAGS |= 2;
+    else FLAGS &= (byte) ~2;
+
+    x -= el.globalX;
+    y -= el.globalY;
+    return this;
+  }
 }
 
 class Button extends GUIElem {
@@ -208,7 +237,7 @@ class Button extends GUIElem {
   }
 
   void tickEvent() {
-    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
+    if (mouseOPressed && flag != mousePressed && abs((globalX + (w >> 1)) - mouseX) <= (w/2) && abs((globalY + (h >> 1)) - mouseY) <= (h / 2)) {
       method(func);
       flag = mousePressed;
     } else if (!mousePressed) {
@@ -242,8 +271,8 @@ class Slider extends GUIElem {
   void tickEvent() {
     float curPos = (value - minV) / (abs(minV) + abs(maxV));
     curPos *= (w - 20);
-    if ((mouseOPressed || flag) && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
-      value += (((float) (mouseX - curPos - x) / w) * (abs(minV) + abs(maxV)));
+    if ((mouseOPressed || flag) && abs((globalX + (w >> 1)) - mouseX) <= (w/2) && abs((globalY + (h >> 1)) - mouseY) <= (h/2)) {
+      value += (((float) (mouseX - globalX - curPos) / w) * (abs(minV) + abs(maxV)));
       value = clamp(value, minV, maxV);
       flag = true;
     } else {
@@ -279,7 +308,7 @@ class Toggle extends GUIElem {
   }
 
   void tickEvent() {
-    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
+    if (mouseOPressed && flag != mousePressed && abs((globalX + (w >> 1)) - mouseX) <= (w/2) && abs((globalY + (h >> 1)) - mouseY) <= (h/2)) {
       value = !value;
       flag = mousePressed;
     } else if (!mousePressed) {
@@ -322,7 +351,7 @@ class Dropdown extends GUIElem {
   }
 
   void tickEvent() {
-    if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w/2 && abs((y + (h >> 1)) - mouseY) <= (h/2)) {
+    if (mouseOPressed && flag != mouseOPressed && abs((globalX + (w >> 1)) - mouseX) <= w/2 && abs((globalY + (h >> 1)) - mouseY) <= (h/2)) {
       if (canAnimated) {
         if (!open) open = true;
         animate = !animate;
@@ -339,25 +368,25 @@ class Dropdown extends GUIElem {
         int yn;
         if (canAnimated) {
           anim += ((animate ? 1 : 0) - anim) * fact;
-          yn = (int) (y + (d * (i+1)) * anim);
-          if (!animate && (yn - y) < 2) {
+          yn = (int) (globalY + (d * (i+1)) * anim);
+          if (!animate && (yn - globalY) < 2) {
             open = false;
           }
         } else {
-          yn = y + (d * (i+1));
+          yn = globalY + (d * (i+1));
         }
 
-        print(open);
-        print(", ");
-        print(animate);
-        print(", ");
-        println(yn);
+        //print(open);
+        //print(", ");
+        //print(animate);
+        //print(", ");
+        //println(yn);
         fill(back);
-        rect(x, yn, w, h);
+        rect(globalX, yn, w, h);
         fill(txt);
-        text(mens[i], x, yn + (h - _FONT)/2, w, h);
+        text(mens[i], globalX, yn + (h - _FONT)/2, w, h);
 
-        if (mouseOPressed && flag != mouseOPressed && abs((x + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
+        if (mouseOPressed && flag != mouseOPressed && abs((globalX + (w >> 1)) - mouseX) <= w && abs((yn + (h >> 1)) - mouseY) <= (h/2)) {
           value = i;
           //open = false;
           if (canAnimated) animate = false;
@@ -439,12 +468,12 @@ class TextField extends GUIElem {
       if (mouseOPressed) isTaken = false;
     }
 
-    if (mouseOPressed && flag != mousePressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) isTaken = true;
+    if (mouseOPressed && flag != mousePressed && abs((globalX + (w >> 1)) - mouseX) <= (w/2) && abs((globalY + (h >> 1)) - mouseY) <= (h / 2)) isTaken = true;
 
     fill(txt);
-    text(value, 0, cnt, x, y +(h + _FONT/2)/2);
+    text(value, 0, cnt, globalX, globalY +(h + _FONT/2)/2);
     if (_STRK) stroke(txt);
-    line(x + (9.75 / 16 * _FONT) * trc, y, x + (9.75 / 16 * _FONT) * trc, y + h);
+    line(globalX + (9.75 / 16 * _FONT) * trc, globalY, globalX + (9.75 / 16 * _FONT) * trc, globalY + h);
     if (_STRK) stroke(0);
   }
 
@@ -507,40 +536,69 @@ class Plotter extends GUIElem {
   }
 
   void tick() {
+    boolean hasElem = (FLAGS & 1) != 0 && (FLAGS & 2) == 0;
+    int parentX = (hasElem ? parent.globalX : 0);
+    int parentY = (hasElem ? parent.globalY : 0);
+    globalX = parentX + x;
+    globalY = parentY + y;
+
     buf = (buf + 1) % dtm;
     dots[buf] = value;
     fill(255);
-    rect(x, y, w, h);
+    rect(globalX, globalY, w, h);
     fill(0);
-    for (int i = 0; i < dtm; i++) circle(i*3 + x, -dots[(buf + i) % dtm] * (h*0.4) + y + h/2, 2);
+    for (int i = 0; i < dtm; i++) circle(i*3 + globalX, -dots[(buf + i) % dtm] * (h*0.4) + globalY + h/2, 2);
     int ttc = h / tc;
-    for (int i = 0; i <= tc; i++) text(int(ix + tv * i), x - 45, y + ttc * (tc - i));
+    for (int i = 0; i <= tc; i++) text(int(ix + tv * i), globalX - 45, globalY + ttc * (tc - i));
   }
 }
 
 class Window extends GUIElem {
   Window(int px, int py, int pw, int ph, int d, int bcol, int col, String name) {
-    super(px, py, pw, ph, bcol, col, name);
-    this.d = d;
+    super(px, py, pw, d, bcol, col, name);
+    this.d = ph;
   }
 
   Window(int px, int py, int pw, int ph, int d, String name) {
-    super(px, py, pw, ph, name);
-    this.d = d;
+    super(px, py, pw, d, name);
+    this.d = ph;
   }
 
   Window(String name, int d) {
     super(name);
-    this.d = d;
+    this.d = h;
+    this.h = d;
   }
 
-  boolean flag = false;
-  int d, tDX, tDY, delX, delY;
+  boolean flag = false, opened = true;
+  int d, tDX, tDY, delX, delY, tmr, clicker, added;
 
   GUIElem[] elems;
+  
+  void setElements(GUIElem[] els, boolean absolute){
+    elems = els;
+    for(int i = 0; i < elems.length; ++i){
+      if(absolute) elems[i].addParent(this, false);
+      else elems[i].addParentRelative(this, false);
+    }
+  }
+  
+  Window reserveElems(int count){
+    elems = new GUIElem[count];
+    return this;
+  }
+  
+  Window addElem(GUIElem el){
+    elems[added] = el;
+    ++added;
+    return this;
+  }
 
   void tickEvent() {
-    if (flag || (mouseOPressed && abs((x + (w >> 1)) - mouseX) <= (w/2) && abs((y + (d >> 1)) - mouseY) <= (d / 2))) {
+    if (elems != null) for (int i = 0; i < elems.length; i++) {
+      if (opened) elems[i].tick();
+    }
+    if (flag || (mouseOPressed && abs((globalX + (w >> 1)) - mouseX) <= (w/2) && abs((globalY + (h >> 1)) - mouseY) <= (h / 2))) {
       if (!mousePressed) {
         flag = false;
         delX = 0;
@@ -548,27 +606,41 @@ class Window extends GUIElem {
         return;
       }
       if (!flag) {
-        tDX = mouseX - x;
-        tDY = mouseY - y;
+        tDX = mouseX - globalX;
+        tDY = mouseY - globalY;
+        println(opened);
+        
+        if (millis() - tmr >= 200) {
+          clicker = 1;
+          tmr = millis();
+        } else {
+          println(clicker);
+          if(mousePressed) ++clicker;
+          if(clicker >= 2){
+            clicker = 0;
+            opened = !opened;
+            tmr = millis();
+            println("What");
+          }
+        }
       }
       flag = true;
-      delX = mouseX - x - tDX;
-      delY = mouseY - y - tDY;
+      delX = mouseX - tDX - globalX;
+      delY = mouseY - tDY - globalY;
       move();
     }
 
-    if (elems != null) for (int i = 0; i < elems.length; i++) {
-      elems[i].tick();
-    }
+    
   }
 
   void tickUI() {
-    noFill();
-    rect(x, y, w, d);
+    //noFill();
+    fill(255);
+    if(opened) rect(globalX, globalY, w, d);
   }
 
   void move() {
-    if (elems != null) for (int i = 0; i < elems.length; i++) elems[i].move(delX, delY);
+    //if (elems != null) for (int i = 0; i < elems.length; i++) elems[i].move(delX, delY);
     x += delX;
     y += delY;
   }
@@ -602,14 +674,15 @@ class Tab extends GUIElem {
   }
 
   void tickEvent() {
-    for (int i = 0; i < subTabs.length; i++) {
-      int xn = x + i * d;
-      fill(255);
-      rect(xn, y, d, h);
-      fill(0);
-      text(subTabs[i], xn, y + (h - _FONT)/2, w, h);
 
-      if (mouseOPressed && flag != mouseOPressed && abs((xn + (d >> 1)) - mouseX) <= (d/2) && abs((y + (h >> 1)) - mouseY) <= (h / 2)) {
+    for (int i = 0; i < subTabs.length; i++) {
+      int xn = globalX + i * d;
+      fill(255);
+      rect(xn, globalY, d, h);
+      fill(0);
+      text(subTabs[i], xn, globalY + (h - _FONT)/2, w, h);
+
+      if (mouseOPressed && flag != mouseOPressed && abs((xn + (d >> 1)) - mouseX) <= (d/2) && abs((globalY + (h >> 1)) - mouseY) <= (h / 2)) {
         value = i;
         flag = mouseOPressed;
       } else if (!mouseOPressed) {
